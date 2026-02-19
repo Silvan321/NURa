@@ -49,14 +49,13 @@ def romberg(a, b, func, N_start: int, order: int):
     """See slide 14 of Lecture 4 annotated slides for the formula used.
     order is the number of initial approximations.
     """
-    romberg_table = np.zeros((order + 1, order + 1))
+    romberg_table = np.zeros((order, order))
     for i in range(order):
         N = (2**i) * N_start  # number of intervals doubles with each depth
         romberg_table[i, 0] = trapezoid(a, b, func, N)
         for j in range(1, i + 1):
-            i = i - 1
-            romberg_table[i, j] = (4**j * romberg_table[i + 1, j - 1] - romberg_table[i, j - 1]) / (4**j - 1)  # General version of 4/3 S_1 - 1/3 S_0
-    return romberg_table[0, order - 1]
+            romberg_table[i, j] = (4**j * romberg_table[i, j - 1] - romberg_table[i - 1, j - 1]) / (4**j - 1)  # General version of 4/3 S_1 - 1/3 S_0
+    return romberg_table[order - 1, order - 1]
 
 
 def x_squared(x):
