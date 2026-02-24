@@ -9,7 +9,7 @@ class GaussJordan:
         The book implementation works for multiple b's at once.
         the bool argument indicates if we want the inverse to be calculated
         """
-        self.ncolumns, self.nrows = a.shape[1], a.shape[0]
+        self.nrows, self.ncolumns = a.shape[0], a.shape[1]
         self.a_inverse = np.identity(self.ncolumns)  # a should be a square matrix
         for column_index in range(self.ncolumns):
             pivot: float = 0.0
@@ -71,6 +71,48 @@ class GaussJordan:
                 b[row_index] -= coefficient_in_pivot_column_of_row_to_be_reduced * b[pivot_row_index]
 
 
+class LUDecomposition:
+    def __init__(self, a: np.ndarray):
+        """This class performs LU decomposition, where a matrix A is decomposed in two matrices L and U.
+        Here L is a Lower Triangular matrix (only elements on or below diagonal), and U is an Upper triangular matrix (only elements on or above the diagonal).
+        We can use these to solve the equation A*x = (L*U)*x = L*(U*x) = b, by first solving L*y=b and then U*x=y.
+        Use the constructor of the class to do the decomposition, using Crout's algorithm (slide 12 lecture 3)
+        Then the instance of the object holds the LU decomposed matrix.
+        We can then call the solve method as many times as we like, for as many b's as we like.
+        """
+        self.nrows, self.ncolumns = a.shape[0], a.shape[1]
+        self.LU_matrix = np.identity(self.ncolumns)  # step 1: construct an identity matrix to start
+        for j in range(self.ncolumns):
+            self.LU_matrix[0, j] = a[0, j]  # for i = 0, beta_0j = a_0j
+            for i in range(1, self.nrows):
+                if i <= j:
+                    self.LU_matrix[i, j] = a[i, j] - np.sum(
+                        self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i)
+                    )  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
+                if i > j:
+                    self.LU_matrix[i, j] = (
+                        1 / self.LU_matrix[j, j] * (a[i, j] - np.sum(self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i)))
+                    )  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
+
+    def get_LU_decomposition(self):
+        return self.LU_matrix
+
+    def solve(self, b: np.ndarray) -> np.ndarray:
+        # Forward substitution first: L*y=b
+        b_size = len(b)
+        y = np.zeros(b_size)
+        x = np.zeros(b_size)
+        y[0] = b[0] / self.LU_matrix[0, 0]
+        for i in range(1, b_size):
+            y[i] = (b[i] - np.sum(self.LU_matrix[i, j] * y[j] for j in range(i))) / self.LU_matrix[i, i]
+
+        # Now do the backsubstitution
+        x[b_size - 1] = y[b_size - 1] / self.LU_matrix[b_size - 1, b_size - 1]
+        for i in reversed(range(b_size)):
+            x[i] = (y[i] - np.sum(self.LU_matrix[i, j] * x[j] for j in range(i + 1, b_size))) / self.LU_matrix[i, i]
+        return x
+
+
 def main():
     A = np.array(
         [
@@ -87,17 +129,27 @@ def main():
     A_copy = deepcopy(A)
     b_copy = deepcopy(b)
 
+    A_copy_2 = deepcopy(A)
+    b_copy_2 = deepcopy(b)
+
     gauss_jordan_solver = GaussJordan()
-    A_inverse = gauss_jordan_solver.solve(A, b)
-    print(f"A, which is now the identity matrix: {A=}, \nb which now holds x: {b=}, \nA_inverse, which started of as the identity matrix: {A_inverse=}")
+    A_inverse = gauss_jordan_solver.solve(A_copy, b_copy)
+    print(f"A_copy, which is now the identity matrix: {A_copy=}, \nb_copy which now holds x: {b_copy=}, \nA_inverse, which started of as the identity matrix: {A_inverse=}")
     # np.allclose(np.dot(A_copy, A_inverse), np.identity)
 
     # Verify using np.linalg.solve
-    x_numpy = np.linalg.solve(A_copy, b_copy)
-    a_inverse_numpy = np.linalg.inv(A_copy)
+    x_numpy = np.linalg.solve(A_copy_2, b_copy_2)
+    a_inverse_numpy = np.linalg.inv(A_copy_2)
     print(f"{x_numpy=}")
     print(f"{a_inverse_numpy}")
-    np.allclose(np.dot(A_copy, x_numpy), b_copy)
+    np.allclose(np.dot(A_copy_2, x_numpy), b_copy_2)
+
+    lu_decomposition_instance = LUDecomposition(A)
+    A_decomposed = lu_decomposition_instance.get_LU_decomposition()
+    print(f"{A_decomposed=}")
+
+    x_lu = lu_decomposition_instance.solve(b)
+    print(f"{x_lu=}")
 
 
 main()
