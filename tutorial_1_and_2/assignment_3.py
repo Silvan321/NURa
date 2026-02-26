@@ -5,7 +5,7 @@ from matplotlib.image import imread
 from matplotlib.pyplot import imshow, show
 import matplotlib.pyplot as plt
 
-image = imread(r"C:\Users\toetseb\Documents\nura\NURa\tutorial_1\M42_128.jpg")
+image = imread(r"C:\Users\toetseb\Documents\nura\NURa\tutorial_1_and_2\M42_128.jpg")
 # imshow(image)
 # show()
 print(f"Image shape: {image.shape}")
@@ -67,15 +67,14 @@ class PolynomialInterpolater(BaseInterpolater):
     """
 
     def interpolate(self, x, xdata, ydata, m):
-        starting_index, closest_index = super().find_starting_index_and_closest_index(x, xdata, m)
-        interpolation_points = xdata[starting_index : starting_index + m - 1]
-        P = deepcopy(ydata[starting_index : starting_index + m - 1])  # vector holding the polynomials
-        initial_solution = ydata[closest_index]
-        for k in range(1, m - 1):
-            for i in range(m - 1 - k):
+        starting_index, _ = super().find_starting_index_and_closest_index(x, xdata, m)
+        interpolation_points = xdata[starting_index : starting_index + m]
+        P = deepcopy(ydata[starting_index : starting_index + m])  # vector holding the polynomials
+        for k in range(1, m):
+            for i in range(m - k):
                 j = i + k
-                P[i] = ((xdata[j] - x) * P[i] + (x - xdata[i]) * P[j]) / (xdata[j] - xdata[i])  # e.g. (x_1-x)P_0 + (x-x_0)P_1 / x_1-x_0
-            if k == (m - 2):  # last addition, get ready to save the error estimate
+                P[i] = ((interpolation_points[j] - x) * P[i] + (x - interpolation_points[i]) * P[i + 1]) / (interpolation_points[j] - interpolation_points[i])  # e.g. (x_1-x)P_0 + (x-x_0)P_1 / x_1-x_0
+            if k == (m - 1):  # last addition, get ready to save the error estimate
                 self.error_estimate = np.abs(P[0] - P[1])
         interpolated_value_at_x = P[0]
         return interpolated_value_at_x
@@ -104,7 +103,7 @@ print(interpolated_row_xdata)
 plt.figure(figsize=[10, 6])
 plt.scatter(first_row_indices, first_row, marker=".", label="data")
 plt.scatter(interpolated_row_xdata, linear_interpolated_row_ydata, linestyle="dashed", marker=",", s=1, label="linear interpolation")
-plt.scatter(interpolated_row_xdata, polynomial_interpolated_row_ydata, linestyle="dashed", marker="*", s=1, label="polynomial interpolation")
+plt.plot(interpolated_row_xdata, polynomial_interpolated_row_ydata, linestyle="dashed", marker="*", label="polynomial interpolation")
 plt.legend()
 plt.ylim(-100, 100)
 plt.show()
