@@ -90,9 +90,9 @@ class LUDecomposition:
                         self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i)
                     )  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
                 if i > j:
-                    self.LU_matrix[i, j] = (
-                        1 / self.LU_matrix[j, j] * (a[i, j] - np.sum(self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i)))
-                    )  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
+                    self.LU_matrix[i, j] = (a[i, j] - np.sum(self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i))) / self.LU_matrix[
+                        j, j
+                    ]  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
 
     def get_LU_decomposition(self):
         return self.LU_matrix
@@ -147,6 +147,7 @@ def main():
     lu_decomposition_instance = LUDecomposition(A)
     A_decomposed = lu_decomposition_instance.get_LU_decomposition()
     print(f"{A_decomposed=}")
+    # CHECK IF LU DECOMPOSED MATRIX IS CORRECT USING NP.LINALG FUNCTION!
 
     x_lu = lu_decomposition_instance.solve(b)
     print(f"{x_lu=}")
