@@ -158,7 +158,7 @@ def main():
     print(f"{A_decomposed_scipy=}")
     print(f"LU decomposition equal to scipy implementation: {np.allclose(A_decomposed, A_decomposed_scipy)}")
 
-    x_lu = lu_decomposition_instance.solve(b)
+    x_lu = lu_decomposition_instance.solve(b)  # temp
     print(f"solution using LU decomposition equal to numpy: {np.allclose(x_lu, x_numpy)}")
     print(f"{x_lu=}")
 
