@@ -1,5 +1,7 @@
-import numpy as np
 from copy import deepcopy
+
+import numpy as np
+import scipy
 
 
 class GaussJordan:
@@ -40,8 +42,7 @@ class GaussJordan:
             self._reduce_rows(a, b, column_index, pivot_row_index, inverse)
         if inverse:
             return self.a_inverse
-        else:
-            return None
+        return None
 
     def _swap_row(self, a, b, row_index_1: int, row_index_2: int):
         temp_row = deepcopy(a[row_index_1])
@@ -54,7 +55,7 @@ class GaussJordan:
         self.a_inverse[row_index_1] = self.a_inverse[row_index_2]
         self.a_inverse[row_index_2] = temp_inv_row
 
-    def _reduce_rows(self, a: np.ndarray, b: np.ndarray, starting_column_index: int, pivot_row_index: int, inverse: bool):
+    def _reduce_rows(self, a: np.ndarray, b: np.ndarray, starting_column_index: int, pivot_row_index: int, inverse: bool):  # noqa: FBT001
         """Reduce all rows with the current pivot row. Notice that we only need to do so for columns that are to the right of the current pivot column,
         as everything to the right of the pivot column has already been reduced. Note that we do not even use the pivot value itself anymore at this step!
         It is not supplied as an argument to this private function.
@@ -84,15 +85,15 @@ class LUDecomposition:
         self.LU_matrix = np.identity(self.ncolumns)  # step 1: construct an identity matrix to start
         for j in range(self.ncolumns):
             self.LU_matrix[0, j] = a[0, j]  # for i = 0, beta_0j = a_0j
-            for i in range(1, self.nrows):
+            for i in range(1, self.nrows):  # starting from 0 or 1 should not make a difference, as the first row is already set to the correct values, but we can skip it to save some time
                 if i <= j:
-                    self.LU_matrix[i, j] = a[i, j] - np.sum(
+                    self.LU_matrix[i, j] = a[i, j] - sum(
                         self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i)
                     )  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
                 if i > j:
-                    self.LU_matrix[i, j] = (a[i, j] - np.sum(self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(i))) / self.LU_matrix[
+                    self.LU_matrix[i, j] = (a[i, j] - sum(self.LU_matrix[i, k] * self.LU_matrix[k, j] for k in range(j))) / self.LU_matrix[
                         j, j
-                    ]  # beta_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to i-1. range doesn't include end point!
+                    ]  # alpha_ij = a_ij - sum (alpha_ik beta_kj) from k=0 to j-1. range doesn't include end point!
 
     def get_LU_decomposition(self):
         return self.LU_matrix
@@ -102,14 +103,14 @@ class LUDecomposition:
         b_size = len(b)
         y = np.zeros(b_size)
         x = np.zeros(b_size)
-        y[0] = b[0] / self.LU_matrix[0, 0]
+        y[0] = b[0]  # don't need to divide by LU_matrix[i,i] as for the forward substitution, the diagonal elements of L are all 1's
         for i in range(1, b_size):
-            y[i] = (b[i] - np.sum(self.LU_matrix[i, j] * y[j] for j in range(i))) / self.LU_matrix[i, i]
+            y[i] = b[i] - sum(self.LU_matrix[i, j] * y[j] for j in range(i))
 
         # Now do the backsubstitution
         x[b_size - 1] = y[b_size - 1] / self.LU_matrix[b_size - 1, b_size - 1]
         for i in reversed(range(b_size)):
-            x[i] = (y[i] - np.sum(self.LU_matrix[i, j] * x[j] for j in range(i + 1, b_size))) / self.LU_matrix[i, i]
+            x[i] = (y[i] - sum(self.LU_matrix[i, j] * x[j] for j in range(i + 1, b_size))) / self.LU_matrix[i, i]
         return x
 
 
@@ -144,12 +145,21 @@ def main():
     print(f"{a_inverse_numpy}")
     np.allclose(np.dot(A_copy_2, x_numpy), b_copy_2)
 
+    print(f"{A=}")
     lu_decomposition_instance = LUDecomposition(A)
     A_decomposed = lu_decomposition_instance.get_LU_decomposition()
     print(f"{A_decomposed=}")
-    # CHECK IF LU DECOMPOSED MATRIX IS CORRECT USING NP.LINALG FUNCTION!
+    # verify if LU decomposed matrix is correct
+    P, L_scipy, U_scipy = scipy.linalg.lu(A, permute_l=False)
+    print(f"{L_scipy=}")
+    print(f"{U_scipy=}")
+    A_decomposed_scipy = P @ L_scipy + U_scipy - np.eye(A.shape[0])
+    # A = L @ U so matrix multiplied. the decomposition of A is L + U - I as one has zeros where the other has nonzero elements and vice versa, except for the diagonal
+    print(f"{A_decomposed_scipy=}")
+    print(f"LU decomposition equal to scipy implementation: {np.allclose(A_decomposed, A_decomposed_scipy)}")
 
     x_lu = lu_decomposition_instance.solve(b)
+    print(f"solution using LU decomposition equal to numpy: {np.allclose(x_lu, x_numpy)}")
     print(f"{x_lu=}")
 
 
