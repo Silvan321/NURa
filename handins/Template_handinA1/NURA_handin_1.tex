@@ -45,15 +45,6 @@
 \begin{document}
 \maketitle
 
-
-
-\textit{Write a short description of your solution in each section. Explain your choices. Draw the conclusions from your results.}
-
-\textit{You can refer to selected lines of code where you think it is necessary. However, you must provide the full code below each question/task.}
-
-
-\textit{Don't forget to describe your figures and mention what conclusions you draw from them!}
-
 \section{Poisson Distribution}
 In this question, we are asked to compute the Poisson distribution for integer k:
 \begin{equation}
@@ -104,7 +95,7 @@ Then in 2a we first create the LU decomposition of V with Crout's algorithm.
 Next we solve for the supplied y values to find the coefficients c of the unique polynomial.
 In 2b we use polynomial interpolation using Neville's algorithm to compare our results.
 In 2c we use iterative improvement of the LU decomposition to get a better estimate.
-In 2d we time the different methods.
+In 2d we time the different methods. After printing all our code we will discuss our results.
 \subsection{(2a) LU decomposition}
 
 \begin{figure}[H]
@@ -142,7 +133,15 @@ The following code was used for parts (2a)--(2d):
 \lstinputlisting[language=Python]{\CodeDir/Vandermonde_all_code.txt}
 
 \subsection{Conclusions}
-\textit{Write a short summary here: which method is most accurate, where errors increase, and how iterations affect accuracy.}
+As we can see from the plots in this section, Neville's algorithm is most accurate.
+The LU decomposition method starts to oscillate more and more as we increase our x values.
+This is likely due to the fact that the Vandermonde matrix becomes more and more ill-conditioned as we increase the x values, leading to larger numerical errors in the solution.
+I think this problem is amplified due to my method not implementing partial pivoting, which would help to reduce the numerical errors in the solution.
+The iterative improvement of the LU decomposition does improve the accuracy, but it still does not reach the accuracy of Neville's algorithm.
+This is likely because the initial solution obtained from the LU decomposition is already quite inaccurate, and the iterative improvement can only do so much to correct it.
 
+However, in terms of speed, LU decomposition is much faster than Neville's algorithm in this case, roughly by a factor of 50.
+We also see that 10 extra iterations to improve the LU decomposition solution only doubles the execution time.
+Most of the execution time is spent on constructing the LU decomposition itself.
 \end{document}
 
