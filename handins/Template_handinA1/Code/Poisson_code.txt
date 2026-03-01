@@ -1,3 +1,5 @@
+from math import e
+
 import numpy as np
 
 
@@ -8,11 +10,10 @@ def Poisson(k: np.int32, lmbda: np.float32) -> np.float32:
         lmbda (np.float32): The mean number of occurrences.
     Returns:
         np.float32: The probability of observing k occurrences given the mean lmbda.
+    Since the calculation will quickly overflow due to the extremely large numbers involved, we rewrite the equation in log10 space.
+    Then we return 10^<log version>. For the derivation see the Latex document.
     """
-    # TODO:
-    # write your code here to calculate the Poisson probability
-
-    return 0.0
+    return 10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k + 1)))
 
 
 def main() -> None:

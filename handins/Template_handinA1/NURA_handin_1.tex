@@ -63,11 +63,14 @@ given a positive mean $\lambda$. We are asked to compute $P_\lambda(k)$ for the 
 We are restricted to 32 bit numbers. This means we will get overflow errors for most combinations of $k$ and $\lambda$ due to the rapid growth of $k!$ and $\lambda^{k}$ and underflow due to $e^{-lambda}$.
 To prevent this we rewrite the equation in log10 form:
 \begin{align}
-  P_\lambda(k)           & = \frac{\lambda^k e^{-\lambda}}{k!}                                 \\
-  log_{10}(P_\lambda(k)) & = log_{10}(\lambda^k) + log_{10}(e^{-\lambda}) - log_{10}(k!)       \\
-                         & = k log_{10}(\lambda) - \lambda log_{10}(e) - log_{10}(PRODUCTDING) \\
-                         & = log_{10} - log_{10} - log_{10}
+  \\
+  log_{10}(P_\lambda(k)) & = log_{10}(\lambda^k) + log_{10}(e^{-\lambda}) - log_{10}(k!)                    \\
+                         & = k\ log_{10}(\lambda) - \lambda\ log_{10}(e) - log_{10}(\prod_{i=1}^{k} i)      \\
+                         & = k\ log_{10}(\lambda) - \lambda\ log_{10}(e) - \sum_{i=1}^{k}i\ log_{10}        \\
+  -> P_\lambda(k)        & = 10^{(k\ log_{10}(\lambda) - \lambda\ log_{10}(e) - \sum_{i=1}^{k}i\ log_{10})}
 \end{align}
+We choose log10 over the natural logarithm as this leads to a larger 'compression' of the large numbers, preventing overflow for a wider input range.
+
 
 % Add the full code below.
 The full code used for this question:

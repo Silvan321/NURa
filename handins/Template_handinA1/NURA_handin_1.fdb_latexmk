@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1772387536.74076 "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" "NURA_handin_1.pdf" "NURA_handin_1" 1772387537.61603 0
+["pdflatex"] 1772393650.02989 "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" "NURA_handin_1.pdf" "NURA_handin_1" 1772393650.93978 0
   "C:/Users/toetseb/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1772380229 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/toetseb/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1772379299 13334816 ae4be2e894a1f38157c7663824db10c4 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1233951848 1004 54797486969f23fa377b128694d548df ""
@@ -26,7 +26,9 @@
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmtt10.tfm" 1136765053 768 1321e9409b4137d6fb428ac9dc956269 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmtt8.tfm" 1136765053 768 d7b9a2629a0c353102ad947dc9221d49 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb" 1247596666 32080 340ef9bf63678554ee606688e7b5339d ""
+  "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb" 1247596667 30251 6afa5cb1d0204815a708a080681d4674 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1247596667 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
+  "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb" 1247596667 37912 07513ec114ac737ab54cea0152f4424b ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb" 1247596667 36281 c355509802a035cadc5f15869451dcee ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1247596667 35752 024fb6c41858982481f6968b5fc26508 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb" 1247596667 32722 d7379af29a190c3f453aba36302ff5a9 ""
@@ -37,6 +39,7 @@
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1247596666 32716 08e384dc442464e7285e891af9f45947 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb" 1247596667 37944 359e864bd06cde3b1cf57bb20757fb06 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt8.pfb" 1247596666 24287 6b803fa9eb1ddff9112e00519b09dd9e ""
+  "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex7.pfb" 1247596670 30457 bc0868ebece724ed7c3d37e3d9bff7bd ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/tex/context/base/mkii/supp-pdf.mkii" 1580390158 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/tex/generic/babel/babel.sty" 1771089191 147019 f2ca437186bfeb562e1066ad59426a04 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/tex/generic/babel/locale/en/babel-en.ini" 1771089192 3936 fef897bbcfe8e9d18c93a3d2d53cf9d8 ""
@@ -105,11 +108,11 @@
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "Code/Poisson_code.txt" 1772113083 1159 7d3552a5e041e9d9d096fbf6c98f738c ""
-  "NURA_handin_1.aux" 1772387537 884 e2631578af74a58d5d229a2a5e252c0e "pdflatex"
-  "NURA_handin_1.out" 1772387537 146 897781bd139979254858f2d197f421ee "pdflatex"
-  "NURA_handin_1.tex" 1772387536 4483 0b11dceb7823f3126299d5ab02ffd140 ""
+  "NURA_handin_1.aux" 1772393650 884 e2631578af74a58d5d229a2a5e252c0e "pdflatex"
+  "NURA_handin_1.out" 1772393650 146 897781bd139979254858f2d197f421ee "pdflatex"
+  "NURA_handin_1.tex" 1772393649 4726 91fb851daf0f01b399d547b1d7fdaa0b ""
   "Poisson_output.txt" 1772386437 209 c8537af4bd6004af43748c98801c9782 ""
-  "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" 1772387536 4483 0b11dceb7823f3126299d5ab02ffd140 ""
+  "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" 1772393649 4726 91fb851daf0f01b399d547b1d7fdaa0b ""
   (generated)
   "NURA_handin_1.aux"
   "NURA_handin_1.log"
