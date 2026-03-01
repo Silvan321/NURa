@@ -1,19 +1,6 @@
-import numpy as np
 from math import e
-from scipy.stats import poisson
-import math
 
-
-def _factorial(k: np.int32):
-    """Define the factorial function ourselves since we are not allowed to use the build it numpy function."""
-    if not isinstance(k, np.int32):
-        raise TypeError("k should be an np.int32!")
-    if k < 0:
-        raise ValueError("k should be a positive integer")
-    product: np.int32 = np.int32(1)
-    for integer in range(2, k + 1):  # Start at 2 since we don't want to multiply with 0 and 1, and stop at k+1 since k should be included
-        product *= integer
-    return product
+import numpy as np
 
 
 def Poisson(k: np.int32, lmbda: np.float32) -> np.float32:
@@ -23,11 +10,10 @@ def Poisson(k: np.int32, lmbda: np.float32) -> np.float32:
         lmbda (np.float32): The mean number of occurrences.
     Returns:
         np.float32: The probability of observing k occurrences given the mean lmbda.
+    Since the calculation will quickly overflow due to the extremely large numbers involved, we rewrite the equation in log10 space.
+    Then we return 10^<log version>. For the derivation see the Latex document.
     """
-
-    print(np.allclose(poisson.pmf(int(k), float(lmbda)), 10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k + 1)))))
-    print(f"{poisson.pmf(int(k), float(lmbda))=}, {10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k+1)))=}")
-    return 10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k)))
+    return 10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k + 1)))
 
 
 def main() -> None:
