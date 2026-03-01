@@ -24,15 +24,9 @@ def Poisson(k: np.int32, lmbda: np.float32) -> np.float32:
     Returns:
         np.float32: The probability of observing k occurrences given the mean lmbda.
     """
-    print()
-    print(k * np.log10(lmbda))
-    print(lmbda * np.log10(e))
-    print(sum(np.log10(i) for i in range(1, k)))
 
-    def custom_poisson_pmf(k, lam):
-        return lam**k * math.exp(-lam) / math.factorial(k)
-
-    print(f"{poisson.pmf(int(k), float(lmbda))=}, {custom_poisson_pmf(int(k), float(lmbda))=}, {10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k+1)))=}")
+    print(np.allclose(poisson.pmf(int(k), float(lmbda)), 10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k + 1)))))
+    print(f"{poisson.pmf(int(k), float(lmbda))=}, {10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k+1)))=}")
     return 10 ** (k * np.log10(lmbda) - lmbda * np.log10(e) - sum(np.log10(i) for i in range(1, k)))
 
 
