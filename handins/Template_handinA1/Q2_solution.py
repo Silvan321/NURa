@@ -22,9 +22,7 @@ def load_data():
 
     y (np.ndarray): Array of y data points.
     """
-    data = np.genfromtxt(
-        os.path.join(sys.path[0], "Vandermonde.txt"), comments="#", dtype=np.float64
-    )
+    data = np.genfromtxt(os.path.join(sys.path[0], "Vandermonde.txt"), comments="#", dtype=np.float64)
     x = data[:, 0]
     y = data[:, 1]
     return x, y
@@ -44,9 +42,11 @@ def construct_vandermonde_matrix(x: np.ndarray) -> np.ndarray:
     """
     # TODO:
     # Replace with actual Vandermonde!
-    return np.zeros(
-        (len(x), len(x)), dtype=np.float64
-    )
+    V = np.zeros((len(x), len(x)), dtype=np.float64)
+    for i, xvalue in enumerate(x):
+        for j in range(len(x)):
+            V[i, j] = xvalue**j
+    return V
 
 
 def LU_decomposition(A: np.ndarray) -> np.ndarray:
@@ -242,7 +242,7 @@ def plot_part_a(
 
     axs[0].plot(x_data, y_data, marker="o", linewidth=0)
     axs[0].plot(xx, yy, linewidth=3)
-    axs[0].set_xlim(np.floor(xx[0])-0.01*(xx[-1]-xx[0]), np.ceil(xx[-1])+0.01*(xx[-1]-xx[0]))
+    axs[0].set_xlim(np.floor(xx[0]) - 0.01 * (xx[-1] - xx[0]), np.ceil(xx[-1]) + 0.01 * (xx[-1] - xx[0]))
     axs[0].set_ylim(-400, 400)
     axs[0].set_ylabel("$y$")
     axs[0].legend(["data", "Via LU decomposition"], frameon=False, loc="lower left")
@@ -288,7 +288,7 @@ def plot_part_b(
 
     axs[0].plot(x_data, y_data, marker="o", linewidth=0)
     axs[0].plot(xx, yy, linestyle="dashed", linewidth=3)
-    axs[0].set_xlim(np.floor(xx[0])-0.01*(xx[-1]-xx[0]), np.ceil(xx[-1])+0.01*(xx[-1]-xx[0]))
+    axs[0].set_xlim(np.floor(xx[0]) - 0.01 * (xx[-1] - xx[0]), np.ceil(xx[-1]) + 0.01 * (xx[-1] - xx[0]))
     axs[0].set_ylim(-400, 400)
     axs[0].set_ylabel("$y$")
     axs[0].legend(["data", "Via Neville's algorithm"], frameon=False, loc="lower left")
@@ -360,7 +360,7 @@ def plot_part_c(
         )
         axs[1].plot(x_data, diff, linestyle=linstyl[i], color=colors[i], linewidth=3)
 
-    axs[0].set_xlim(np.floor(xx[0])-0.01*(xx[-1]-xx[0]), np.ceil(xx[-1])+0.01*(xx[-1]-xx[0]))
+    axs[0].set_xlim(np.floor(xx[0]) - 0.01 * (xx[-1] - xx[0]), np.ceil(xx[-1]) + 0.01 * (xx[-1] - xx[0]))
     axs[0].set_ylim(-400, 400)
     axs[0].set_ylabel("$y$")
     axs[0].legend(frameon=False, loc="lower left")
@@ -377,6 +377,7 @@ def plot_part_c(
 def main():
     os.makedirs("Plots", exist_ok=True)
     x_data, y_data = load_data()
+    V = construct_vandermonde_matrix(x_data)
 
     # compute times
     number = 10
@@ -392,9 +393,7 @@ def main():
     xx = np.linspace(x_data[0], x_data[-1], 1001)
     t_b = (
         timeit.timeit(
-            stmt=lambda: np.array(
-                [neville(x_data, y_data, x) for x in xx], dtype=np.float64
-            ),
+            stmt=lambda: np.array([neville(x_data, y_data, x) for x in xx], dtype=np.float64),
             number=number,
         )
         / number
@@ -420,7 +419,7 @@ def main():
     formatted_c = [f"{coef:.3e}" for coef in c_a]
     with open("Coefficients_output.txt", "w", encoding="utf-8") as f:
         for i, coef in enumerate(formatted_c):
-            f.write(f"c$_{i+1}$ = {coef}, ")
+            f.write(f"c$_{i + 1}$ = {coef}, ")
 
     plot_part_b(x_data, y_data)
 
