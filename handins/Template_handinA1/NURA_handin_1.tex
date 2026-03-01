@@ -45,9 +45,7 @@
 \begin{document}
 \maketitle
 
-\begin{align}
-  placeholder
-\end{align}
+
 
 \textit{Write a short description of your solution in each section. Explain your choices. Draw the conclusions from your results.}
 
@@ -57,25 +55,39 @@
 \textit{Don't forget to describe your figures and mention what conclusions you draw from them!}
 
 \section{Poisson Distribution}
+In this question, we are asked to compute the Poisson distribution for integer k:
+\begin{equation}
+  P_\lambda(k) = \frac{\lambda^k e^{-\lambda}}{k!}
+\end{equation}
+given a positive mean $\lambda$. We are asked to compute $P_\lambda(k)$ for the values in \ref{tab:poisson}.
+We are restricted to 32 bit numbers. This means we will get overflow errors for most combinations of $k$ and $\lambda$ due to the rapid growth of $k!$ and $\lambda^{k}$ and underflow due to $e^{-lambda}$.
+To prevent this we rewrite the equation in log10 form:
+\begin{align}
+  P_\lambda(k)           & = \frac{\lambda^k e^{-\lambda}}{k!}                                 \\
+  log_{10}(P_\lambda(k)) & = log_{10}(\lambda^k) + log_{10}(e^{-\lambda}) - log_{10}(k!)       \\
+                         & = k log_{10}(\lambda) - \lambda log_{10}(e) - log_{10}(PRODUCTDING) \\
+                         & = log_{10} - log_{10} - log_{10}
+\end{align}
 
 % Add the full code below.
 The full code used for this question:
 \lstinputlisting[language=Python]{\CodeDir/Poisson_code.txt}
 
-% % Show your results.
-% The results of $P_\lambda(k)$ for selected values of $k$ and $\lambda$ are shown in Table~\ref{tab:poisson}.
+% Show your results.
+The results of $P_\lambda(k)$ for selected values of $k$ and $\lambda$ are shown in Table~\ref{tab:poisson}.
 
-% \begin{table}[H]
-% \centering
-% \caption{Poisson probability distribution for selected $k$ and $\lambda$.}
-% \label{tab:poisson}
-% \begin{tabular}{|c|c|c|}
-% \hline
-% $\lambda$ & $k$ & $P_\lambda(k)$ \\ 
-% \hline
-% \input{Poisson_output.txt}
-% \end{tabular}
-% \end{table}
+\begin{table}[H]
+  \centering
+  \caption{Poisson probability distribution for selected $k$ and $\lambda$.}
+  \label{tab:poisson}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    $\lambda$ & $k$ & $P_\lambda(k)$ \\
+    \hline
+    \input{Poisson_output.txt}       \\
+    \hline
+  \end{tabular}
+\end{table}
 
 % \section{Vandermonde Matrix and Interpolation}
 
