@@ -1,3 +1,4 @@
+from copy import deepcopy
 import os
 import sys
 import timeit
@@ -114,23 +115,65 @@ def evaluate_polynomial(c: np.ndarray, x_eval: np.ndarray) -> np.ndarray:
     return polynomial_at_evaluated_points
 
 
-def neville(x_data: np.ndarray, y_data: np.ndarray, x_interp: float) -> float:
+class BaseInterpolater:
+    """This class is a base class to do general interpolation tasks, such as bisection and testing if xdata is monotonic.
+    In the tutorial I used this base class as a superclass for both the LinearInterpolator and PolynomialInterpolater classes.
+    In this Python file I have only placed the base and polynomial interpolator classes.
     """
-    Function that applies Nevilles algorithm to calculate the function value at x_interp.
 
-    Parameters
-    ------------
-    x_data (np.ndarray): Array of x data points.
-    y_data (np.ndarray): Array of y data points.
-    x_interp (float): The x value at which to interpolate.
+    def find_starting_index_and_closest_index(self, x: float, xdata: np.ndarray, m: int) -> tuple[int, int]:
+        """X is the value to interpolate the function f at, aka we want to know f(x).
+        xdata are the x values of the measured data points.
+        m is the number of points to be used locally for interpolation. Therefore it is the order of the polynomial PLUS 1. i.e. m=2 means linear interpolation.
+        we want to find the starting index of the points we want to use for interpolation and the index of the values in xdata closest to x.
+        """
+        if not self._test_xdata_monotonic(xdata):
+            raise ValueError("xdata should be monotonic")
+        j_low = 0  # lowest index
+        j_high = len(xdata) - 1  # highest index
+        while (j_high - j_low) > 1:
+            j_middle = (j_high + j_low) // 2
+            if x >= xdata[j_middle]:
+                j_low = j_middle
+            else:
+                j_high = j_middle
+        return max(
+            0, min(len(xdata) - m, j_low - ((m - 2) // 2))
+        ), j_low  # j_low now holds the midpoint. the higher the order m of interpolation, the more we have to go back to find the starting index.
 
-    Returns
-    ------------
-    float: The interpolated y value at x_interp.
+    # -2 because when m=2, the middle point is the starting index. Because a higher order polynomial uses points on either side of x, we divide m by 2 when looking for the starting index.
+
+    def _test_xdata_monotonic(self, xdata) -> bool:
+        if xdata[1] > xdata[0]:  # xdata should be monotonically increasing
+            return self._test_xdata_monotonically_increasing(xdata)
+        if xdata[1] < xdata[0]:  # xdata should be monotonically decreasing
+            return self._test_xdata_monotonically_decreasing(xdata)
+        return False  # Catch case where first two values are equal
+
+    def _test_xdata_monotonically_increasing(self, xdata) -> bool:
+        return all(xdata[i] > xdata[i - 1] for i in range(1, len(xdata)))
+
+    def _test_xdata_monotonically_decreasing(self, xdata) -> bool:
+        return all(xdata[i] < xdata[i - 1] for i in range(1, len(xdata)))
+
+
+class PolynomialInterpolater(BaseInterpolater):
+    """Class to do polynomial interpolation using Neville's algorithm.
+    m is the number of points to be used locally for interpolation. Therefore it is the order of the polynomial PLUS 1. i.e. m=2 means linear interpolation.
+    We use a 1D vector to hold successive improvements (i.e. higher orders) of the polynomials.
     """
-    # TODO:
-    # write your Neville's algorithm
-    return 0
+
+    def interpolate(self, x, xdata, ydata, m):
+        starting_index, _ = super().find_starting_index_and_closest_index(x, xdata, m)
+        interpolation_points = xdata[starting_index : starting_index + m]
+        P = deepcopy(ydata[starting_index : starting_index + m])  # 1D vector holding the polynomials
+        for k in range(1, m):
+            for i in range(m - k):
+                j = i + k
+                P[i] = ((interpolation_points[j] - x) * P[i] + (x - interpolation_points[i]) * P[i + 1]) / (interpolation_points[j] - interpolation_points[i])  # e.g. (x_1-x)P_0 + (x-x_0)P_1 / x_1-x_0
+            if k == (m - 1):  # last addition, get ready to save the error estimate
+                self.error_estimate = np.abs(P[0] - P[1])
+        return P[0]
 
 
 # you can merge the function below with LU_decomposition to make it more efficient
@@ -219,8 +262,7 @@ def plot_part_b(
     y_data: np.ndarray,
     plots_dir: str = "Plots",
 ) -> None:
-    """
-    Ploting routine for part (b) results.
+    """Ploting routine for part (b) results.
 
     Parameters
     ----------
@@ -236,8 +278,8 @@ def plot_part_b(
     None
     """
     xx = np.linspace(x_data[0], x_data[-1], 1001)
-    yy = np.array([neville(x_data, y_data, x) for x in xx], dtype=np.float64)
-    y_at_data = np.array([neville(x_data, y_data, x) for x in x_data], dtype=np.float64)
+    yy = np.array([PolynomialInterpolater().interpolate(x, x_data, y_data, m=len(x_data)) for x in xx], dtype=np.float64)
+    y_at_data = np.array([PolynomialInterpolater().interpolate(x, x_data, y_data, m=len(x_data)) for x in x_data], dtype=np.float64)
 
     fig = plt.figure(figsize=(10, 10))
     gs = fig.add_gridspec(2, hspace=0, height_ratios=[2.0, 1.0])
@@ -267,8 +309,7 @@ def plot_part_c(
     iterations_num: list[int] = [0, 1, 10],
     plots_dir: str = "Plots",
 ) -> None:
-    """
-    Ploting routine for part (c) results.
+    """Ploting routine for part (c) results.
 
     Parameters
     ----------
@@ -287,7 +328,6 @@ def plot_part_c(
     -------
     None
     """
-
     linstyl = ["solid", "dashed", "dotted"]
     colors = ["tab:blue", "tab:orange", "tab:green"]
 
@@ -338,16 +378,21 @@ def main():
 
     # I prefer a class implementation for the LU decomposition, based on the book "Numerical Recipes"
     # The constructor does the decomposition, the getter allows access to LU matrix itself
-    ludcmp_instance = LUDecomposition(V)
-    V_lu = ludcmp_instance.get_LU_decomposition()
+    # Since I will have to compare execution times in question 2d, I write a small wrapper here,
+    # as I assume the LU decomposition itself should also be done the set number of times for comparison
 
-    ludcmp_instance.solve(y_data)
+    def vandermonde_solve_coefficients(V, y_data):
+        ludcmp_instance = LUDecomposition(V)
+        ludcmp_instance.solve(y_data)
+
+    # I also use a class implementation for the polynomial interpolator (which uses Neville's algorithm)
+
     # compute times
     number = 10
 
     t_a = (
         timeit.timeit(
-            stmt=lambda: ludcmp_instance.solve(y_data),
+            stmt=lambda: vandermonde_solve_coefficients(V, y_data),
             number=number,
         )
         / number
@@ -356,7 +401,7 @@ def main():
     xx = np.linspace(x_data[0], x_data[-1], 1001)
     t_b = (
         timeit.timeit(
-            stmt=lambda: np.array([neville(x_data, y_data, x) for x in xx], dtype=np.float64),
+            stmt=lambda: np.array([PolynomialInterpolater().interpolate(x, x_data, y_data, m=len(x_data)) for x in xx], dtype=np.float64),
             number=number,
         )
         / number
@@ -375,6 +420,8 @@ def main():
         f.write(f"\\item Execution time for part (a): {t_a:.5f} seconds\n")
         f.write(f"\\item Execution time for part (b): {t_b:.5f} seconds\n")
         f.write(f"\\item Execution time for part (c): {t_c:.5f} seconds\n")
+
+    ludcmp_instance = LUDecomposition(V)
     c_a = ludcmp_instance.solve(y_data)
     plot_part_a(x_data, y_data, c_a)
 
