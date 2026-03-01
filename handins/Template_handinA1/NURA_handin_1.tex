@@ -92,45 +92,57 @@ The results of $P_\lambda(k)$ for selected values of $k$ and $\lambda$ are shown
   \end{tabular}
 \end{table}
 
-% \section{Vandermonde Matrix and Interpolation}
+\section{Vandermonde Matrix and Interpolation}
+For question 2 we are asked to solve the equation $\boldsymbol{Vc = y}$ for c.
+This gives us the coeffients of the unique polynomial that passes through all points:
+\begin{align}
+  y_i = \sum_{j=0}^{N-1} c_j x_i^j (i = 0, ..., N-1)
+\end{align}
 
-% \subsection{(2a) LU decomposition}
-% \begin{figure}[H]
-%   \centering
-%   \includegraphics[width=0.80\textwidth]{\PlotDir/vandermonde_sol_2a.pdf}
-%   \caption{Polynomial fit evaluated using LU decomposition. Top: data points and interpolated curve. Bottom: absolute error at the data points on a log scale.}
-%   \label{fig:vandermonde_2a}
-% \end{figure}
+First we construct the Vandermonde matrix V using x values in the supplied datafile.
+Then in 2a we first create the LU decomposition of V with Crout's algorithm.
+Next we solve for the supplied y values to find the coefficients c of the unique polynomial.
+In 2b we use polynomial interpolation using Neville's algorithm to compare our results.
+In 2c we use iterative improvement of the LU decomposition to get a better estimate.
+In 2d we time the different methods.
+\subsection{(2a) LU decomposition}
 
-% \subsection{(2b) Neville's algorithm}
-% \begin{figure}[H]
-%   \centering
-%   \includegraphics[width=0.80\textwidth]{\PlotDir/vandermonde_sol_2b.pdf}
-%   \caption{Interpolation using Neville's algorithm. Top: data points and interpolated curve. Bottom: absolute error at the data points on a log scale.}
-%   \label{fig:vandermonde_2b}
-% \end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.80\textwidth]{\PlotDir/vandermonde_sol_2a.pdf}
+  \caption{Polynomial fit evaluated using LU decomposition. Top: data points and interpolated curve. Bottom: absolute error at the data points on a log scale.}
+  \label{fig:vandermonde_2a}
+\end{figure}
 
-% \subsection{(2c) Improving the LU decomposition}
-% \begin{figure}[H]
-%   \centering
-%   \includegraphics[width=0.80\textwidth]{\PlotDir/vandermonde_sol_2c.pdf}
-%   \caption{LU-based solution with iterative refinement (showing iterations 0, 1 and 10). Top: interpolated curves. Bottom: absolute error at the data points on a log scale.}
-%   \label{fig:vandermonde_2c}
-% \end{figure}
+\subsection{(2b) Neville's algorithm}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.80\textwidth]{\PlotDir/vandermonde_sol_2b.pdf}
+  \caption{Interpolation using Neville's algorithm. Top: data points and interpolated curve. Bottom: absolute error at the data points on a log scale.}
+  \label{fig:vandermonde_2b}
+\end{figure}
 
-% \subsection{(2d) Timing}
+\subsection{(2c) Improving the LU decomposition}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.80\textwidth]{\PlotDir/vandermonde_sol_2c.pdf}
+  \caption{LU-based solution with iterative refinement (showing iterations 0, 1 and 10). Top: interpolated curves. Bottom: absolute error at the data points on a log scale.}
+  \label{fig:vandermonde_2c}
+\end{figure}
 
-% Timing results (average per run):
-% \begin{itemize}
-%   \input{Execution_times.txt}
-% \end{itemize}
+\subsection{(2d) Timing}
 
-% \subsection{Code for Question 2}
-% The following code was used for parts (2a)--(2d):
-% \lstinputlisting[language=Python]{\CodeDir/Vandermonde_all_code.txt}
+Timing results (average per run):
+\begin{itemize}
+  \input{Execution_times.txt}
+\end{itemize}
 
-% \subsection{Conclusions}
-% \textit{Write a short summary here: which method is most accurate, where errors increase, and how iterations affect accuracy.}
+\subsection{Code for Question 2}
+The following code was used for parts (2a)--(2d):
+\lstinputlisting[language=Python]{\CodeDir/Vandermonde_all_code.txt}
+
+\subsection{Conclusions}
+\textit{Write a short summary here: which method is most accurate, where errors increase, and how iterations affect accuracy.}
 
 \end{document}
 

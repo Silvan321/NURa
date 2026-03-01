@@ -23,16 +23,16 @@ class BaseInterpolater:
         j_low = 0  # lowest index
         j_high = len(xdata) - 1  # highest index
         while (j_high - j_low) > 1:
-            j_middle = (j_high + j_low) // 2
+            j_middle = (j_high + j_low) >> 1
             if x >= xdata[j_middle]:
                 j_low = j_middle
             else:
                 j_high = j_middle
         return max(
-            0, min(len(xdata) - m, j_low - ((m - 2) // 2))
+            0, min(len(xdata) - m, j_low - ((m - 2) >> 1))
         ), j_low  # j_low now holds the midpoint. the higher the order m of interpolation, the more we have to go back to find the starting index.
 
-    # -2 because when m=2, the middle point is the starting index. Because a higher order polynomial uses points on either side of x, we divide m by 2 when looking for the starting index.
+    # -2 because when m=2, the middle point is the starting index. Because a higher order polynomial uses points on either side of x, we divide m by 2 (bitshift 1 to the right) when looking for the starting index.
 
     def _test_xdata_monotonic(self, xdata) -> bool:
         if xdata[1] > xdata[0]:  # xdata should be monotonically increasing
