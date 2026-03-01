@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1772407391.03979 "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" "NURA_handin_1.pdf" "NURA_handin_1" 1772407392.40527 0
+["pdflatex"] 1772407794.19788 "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" "NURA_handin_1.pdf" "NURA_handin_1" 1772407795.4991 0
   "C:/Users/toetseb/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1772380229 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/toetseb/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1000.pk" 1772402719 11548 81e846b1aee442ce2cf68266c5d61a3f ""
   "C:/Users/toetseb/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tctt0800.pk" 1772402717 7416 6e92181b89949f765b7afd0d22a35b00 ""
@@ -124,13 +124,13 @@
   "C:/Users/toetseb/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "Code/Poisson_code.txt" 1772402797 1405 eb3553eaa46d043605e23a221b195d0a ""
   "Code/Vandermonde_all_code.txt" 1772403054 16114 dbaf32bc7862dbe1810506cd82f30489 ""
-  "Execution_times.txt" 1772407389 156 232ea1828142855d7636aadefa0868af ""
-  "NURA_handin_1.aux" 1772407392 3358 d37a7c4b6b415d77a101a43405b45128 "pdflatex"
-  "NURA_handin_1.out" 1772407392 1385 36cc208936ab59119ed8cc6a28b92721 "pdflatex"
+  "Execution_times.txt" 1772407793 156 3ed3c524c58527ac09a0dc9274cf66ac ""
+  "NURA_handin_1.aux" 1772407795 3358 d37a7c4b6b415d77a101a43405b45128 "pdflatex"
+  "NURA_handin_1.out" 1772407795 1385 36cc208936ab59119ed8cc6a28b92721 "pdflatex"
   "NURA_handin_1.tex" 1772403720 5372 7dacfc0660c2640487ec298044812d30 ""
-  "Plots/vandermonde_sol_2a.pdf" 1772407390 17540 9ae782c32c0d88b439f621554ad44dea ""
-  "Plots/vandermonde_sol_2b.pdf" 1772407390 17823 708884fdf8fb25d2419e677a9fe8d261 ""
-  "Plots/vandermonde_sol_2c.pdf" 1772407391 19234 9c2c6db4c424a0ad6d8a452fdb9c1bf7 ""
+  "Plots/vandermonde_sol_2a.pdf" 1772407793 17540 a101faea0684ec8d9cebe25a7a6dd20b ""
+  "Plots/vandermonde_sol_2b.pdf" 1772407793 17823 a20588239f355ceb72059676d074877d ""
+  "Plots/vandermonde_sol_2c.pdf" 1772407794 19234 022140ce25dcf4136bb6ad3a3f5560f2 ""
   "Poisson_output.txt" 1772386437 209 c8537af4bd6004af43748c98801c9782 ""
   "c:/Users/toetseb/Documents/nura/NURa/handins/Template_handinA1/NURA_handin_1.tex" 1772403720 5372 7dacfc0660c2640487ec298044812d30 ""
   (generated)

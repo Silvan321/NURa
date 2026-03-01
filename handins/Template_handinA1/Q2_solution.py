@@ -88,12 +88,12 @@ class LUDecomposition:
             x[i] = (y[i] - sum(self.LU_matrix[i, j] * x[j] for j in range(i + 1, b_size))) / self.LU_matrix[i, i]
         return x
 
-    def iterative_solve(self, b: np.ndarray, x: np.ndarray, iterations: int):
+    def iterative_solve(self, b: np.ndarray, iterations: int):
         """Improve the solution of A*x=b by iteratively solving A*delta = r, where r is the residual of the previous solution, and adding delta_x to the previous solution. Do this ntimes times.
         b is the right hand side. x is the initial solution.
         """
-        coeffs_per_iteration = [np.zeros_like(x) for _ in range(iterations + 1)]
         x = self.solve(b)  # initial solution
+        coeffs_per_iteration = [np.zeros_like(x) for _ in range(iterations + 1)]
         coeffs_per_iteration[0] = deepcopy(x)
         for i in range(iterations):
             r = b - self.a @ x  # compute the residual r (delta_b)
@@ -101,38 +101,6 @@ class LUDecomposition:
             x += delta_x  # update the solution
             coeffs_per_iteration[i + 1] = deepcopy(x)
         return coeffs_per_iteration
-
-
-# you can merge the function below with LU_decomposition to make it more efficient
-def run_LU_iterations(
-    x: np.ndarray,
-    y: np.ndarray,
-    iterations: int = 11,
-    coeffs_output_path: str = "Coefficients_per_iteration.txt",
-):
-    """
-    Iteratively improves computation of coefficients c.
-
-    Parameters
-    ----------
-    x : np.ndarray
-        x-values.
-    y : np.ndarray
-        y-values.
-    iterations : int
-        Number of iterations.
-    coeffs_output_path : str
-        File to write coefficient values per iteration.
-
-    Returns
-    -------
-    coeffs_history :
-        List of coefficient vectors.
-    """
-    # TODO:
-    # Implement an iterative improvement for computing the coefficients c,
-    # and save the coefficients at each iteration to coeffs_output_path.
-    return [np.zeros_like(x) for _ in range(iterations)]  # Replace with your solution
 
 
 def evaluate_polynomial(c: np.ndarray, x_eval: np.ndarray) -> np.ndarray:
@@ -393,12 +361,16 @@ def main():
 
     # I prefer a class implementation for the LU decomposition, based on the book "Numerical Recipes"
     # The constructor does the decomposition, the getter allows access to LU matrix itself
-    # Since I will have to compare execution times in question 2d, I write a small wrapper here,
+    # Since I will have to compare execution times in question 2d, I write two small wrappers here for 2a and 2c,
     # as I assume the LU decomposition itself should also be done the set number of times for comparison
 
     def vandermonde_solve_coefficients(V, y_data):
         ludcmp_instance = LUDecomposition(V)
         ludcmp_instance.solve(y_data)
+
+    def vandermonde_solve_coefficients_with_iterative_improvement(V, y_data, iterations):
+        ludcmp_instance = LUDecomposition(V)
+        ludcmp_instance.iterative_solve(y_data, iterations)
 
     # I also use a class implementation for the polynomial interpolator (which uses Neville's algorithm)
 
@@ -424,7 +396,7 @@ def main():
 
     t_c = (
         timeit.timeit(
-            stmt=lambda: run_LU_iterations(x_data, y_data, iterations=11),
+            stmt=lambda: vandermonde_solve_coefficients_with_iterative_improvement(V, y_data, iterations=11),
             number=number,
         )
         / number
@@ -447,7 +419,7 @@ def main():
 
     plot_part_b(x_data, y_data)
 
-    coeffs_history = ludcmp_instance.iterative_solve(y_data, x_data, iterations=11)
+    coeffs_history = ludcmp_instance.iterative_solve(y_data, iterations=11)
     plot_part_c(x_data, y_data, coeffs_history, iterations_num=[0, 1, 10])
 
 
