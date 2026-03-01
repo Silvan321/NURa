@@ -137,8 +137,8 @@ As we can see from the plots in this section, Neville's algorithm is most accura
 The LU decomposition method starts to oscillate more and more as we increase our x values.
 This is likely due to the fact that the Vandermonde matrix becomes more and more ill-conditioned as we increase the x values, leading to larger numerical errors in the solution.
 I think this problem is amplified due to my method not implementing partial pivoting, which would help to reduce the numerical errors in the solution.
-The iterative improvement of the LU decomposition does improve the accuracy, but it still does not reach the accuracy of Neville's algorithm.
-This is likely because the initial solution obtained from the LU decomposition is already quite inaccurate, and the iterative improvement can only do so much to correct it.
+The iterative improvement of the LU decomposition does not increase the accuracy.
+This is likely because the iterative solution suffers from the same problem as the initial solution.
 
 However, in terms of speed, LU decomposition is much faster than Neville's algorithm in this case, roughly by a factor of 50.
 We also see that 10 extra iterations to improve the LU decomposition solution only doubles the execution time.
