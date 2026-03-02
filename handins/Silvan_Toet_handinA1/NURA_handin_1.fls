@@ -1,6 +1,6 @@
-PWD c:\Users\toetseb\Documents\nura\NURa\handins\Template_handinA1
+PWD c:\Users\toetseb\Documents\nura\NURa\handins\Silvan_Toet_handinA1
 INPUT C:\Users\toetseb\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\toetseb\Documents\nura\NURa\handins\Template_handinA1\NURA_handin_1.tex
+INPUT c:\Users\toetseb\Documents\nura\NURa\handins\Silvan_Toet_handinA1\NURA_handin_1.tex
 OUTPUT NURA_handin_1.log
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls

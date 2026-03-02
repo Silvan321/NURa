@@ -51,7 +51,7 @@ In this question, we are asked to compute the Poisson distribution for integer k
   P_\lambda(k) = \frac{\lambda^k e^{-\lambda}}{k!}
 \end{equation}
 given a positive mean $\lambda$. We are asked to compute $P_\lambda(k)$ for the values in \ref{tab:poisson}.
-We are restricted to 32 bit numbers. This means we will get overflow errors for most combinations of $k$ and $\lambda$ due to the rapid growth of $k!$ and $\lambda^{k}$ and underflow due to $e^{-lambda}$.
+We are restricted to 32 bit numbers. This means we will get overflow errors for most combinations of $k$ and $\lambda$ due to the rapid growth of $k!$ and $\lambda^{k}$ and underflow due to $e^{-\lambda}$.
 To prevent this we rewrite the equation in log10 form:
 \begin{align}
   \\
@@ -140,7 +140,7 @@ I think this problem is amplified due to my method not implementing partial pivo
 The iterative improvement of the LU decomposition does not increase the accuracy.
 This is likely because the iterative solution suffers from the same problem as the initial solution.
 
-However, in terms of speed, LU decomposition is much faster than Neville's algorithm in this case, roughly by a factor of 50.
+However, in terms of speed, LU decomposition is much faster than Neville's algorithm in this case, roughly by a factor of 100.
 We also see that 10 extra iterations to improve the LU decomposition solution only doubles the execution time.
 Most of the execution time is spent on constructing the LU decomposition itself.
 \end{document}
