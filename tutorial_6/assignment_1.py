@@ -39,55 +39,49 @@ def quicksort(A: Sequence):
     first_middle_last, start_indices = selection_sort([a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]]], return_index=True)  # take the median of the first, last and middle element as the pivot
     a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]] = first_middle_last[0], first_middle_last[1], first_middle_last[2]
 
-    def recursive_part(sub_a):
+    def recursive_part(sub_a, sub_start_index):
         """This inner function is called recursively to sort smaller and smaller subarrays."""
         N = len(sub_a)
         x_pivot = sub_a[N // 2]  # since N will become smaller once we apply this step recursively, we don't hardcode this
         i = 0
         j = N - 1
-        i_stop, j_stop = None, None
-        while (small := sub_a[i]) < x_pivot or (big := sub_a[j]) > x_pivot:
-            # We want to run one loop until a[i] >= x_pivot AND a[j] <= x_pivot. Use the walrus operator to prevent evaluating a[i] and a[j] two (OR MORE!) times for the same value of i/j
-            # That means the below if and elif statement cannot both be True if the while loop is still running
-            # second part of or statement not evaluated when first part is true!
-            if small < x_pivot:
-                i += 1
-            else:
-                i_stop = i
-            if big > x_pivot:
-                j -= 1
-            else:
-                j_stop = j
-            if (i_stop is not None) and (j_stop is not None):
-                swap(sub_a, i_stop, j_stop)
 
-        conda, condb = False, False
+        conda, condb = sub_a[i] >= x_pivot, sub_a[j] <= x_pivot
+        if conda and condb:
+            swap(sub_a, i, j)
         while (not conda) or (not condb):
+            # i goes up from 0 until a[i]>=x_pivot
             if not conda:
                 i += 1
                 conda = sub_a[i] >= x_pivot
+            # j goes down from N-1 until a[j]<=x_pivot
             if not condb:
-                j += 1
+                j -= 1
                 condb = sub_a[j] <= x_pivot
+            # pointers have crossed. If we don't check this size-2 subarrays will flip wrongly!
+            if j <= i:
+                break
+            # once we meet both conditions, swap the elements and set conditions to false to continue this iteration of the loop
             if conda and condb:
                 swap(sub_a, i, j)
+                conda, condb = False, False
 
-        sub_a_low, sub_a_high = sub_a[0 : N // 2], sub_a[N // 2 + 1, N]
-        # This will fail if the subarray is 2 in size
+        sub_a_low, sub_a_high = sub_a[0:i], sub_a[i:N]  # FIX THIS SELECTION CALL FOR LENGTH 2 ARRAYS!
         if len(sub_a_low) == 1 and len(sub_a_high) == 1:
             # put at right position in final array
-            pass
+            a[sub_start_index : sub_start_index + 1] = sub_a_low
+            a[sub_start_index + 1 : sub_start_index + 2] = sub_a_high
         elif len(sub_a_low) == 1:
-            # put at right position in final array
-            recursive_part(sub_a_high)
+            a[sub_start_index : sub_start_index + 1] = sub_a_low
+            recursive_part(sub_a_high, sub_start_index + 1)
         elif len(sub_a_high) == 1:
-            # put at right position in final array
-            recursive_part(sub_a_low)
+            a[sub_start_index + i : sub_start_index + i + 1] = sub_a_high
+            recursive_part(sub_a_low, sub_start_index)
         else:
-            recursive_part(sub_a_low), recursive_part(sub_a_high)
+            recursive_part(sub_a_low, sub_start_index), recursive_part(sub_a_high, sub_start_index + i)
         return sub_a
 
-    a = recursive_part(a)
+    a = recursive_part(a, 0)
     return a
 
 
@@ -96,7 +90,7 @@ def quicksort(A: Sequence):
 
 def main():
     np.random.seed(1)
-    A = np.random.randint(0, 100, size=10)
+    A = [3, 27, 43, 10, 9, 82, 38]  # np.random.randint(0, 100, size=20)
     # Assignment 1a: Selection sort
     # The disadvantage of this algorithm is it uses O(N^2) comparisons (and O(N) swaps)
     # It is also not stable (although I would think that the first occurence of certain value is placed at the front)
