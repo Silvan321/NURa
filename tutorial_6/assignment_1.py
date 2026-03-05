@@ -37,17 +37,6 @@ def quicksort(A: Sequence):
     indx_fml = [0, N // 2, N - 1]
     first_middle_last, start_indices = selection_sort([a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]]], return_index=True)  # take the median of the first, last and middle element as the pivot
     a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]] = first_middle_last[0], first_middle_last[1], first_middle_last[2]
-    for i, start_index in enumerate(start_indices):
-        if start_index == 1:
-            start_indices[i] = N // 2
-        if start_index == 2:
-            start_indices[i] = N - 1
-
-    for first_middle_last_index, start_index in zip(indx_fml, start_indices):
-        if first_middle_last_index != start_index:
-            swap(a, first_middle_last_index, start_index)
-
-    return first_middle_last, start_indices
 
 
 def main():
