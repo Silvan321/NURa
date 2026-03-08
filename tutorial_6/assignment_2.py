@@ -79,13 +79,36 @@ def main():
     for i, func in enumerate(func_list):
         axs[i % 2, i // 2].plot(total_x, func(total_x))
         axs[i % 2, i // 2].set_title(f"{func=}")
-    plt.show()
 
+    print()
     # Assignment 2a
     x = np.linspace(2.5, 4.0, num=1000)
     for algorithm in algorithm_list:
         root, number_of_iterations = algorithm(func2a, x[0], x[-1], abs_err=1e-6, rel_err=1e-6)
         print(f"{algorithm=}, {root=}, {number_of_iterations=}")
+
+    print()
+    # Assignment 2b
+    x = np.linspace(0, 0.48, num=1000)
+    for algorithm in algorithm_list:
+        root, number_of_iterations = algorithm(func2b, x[0], x[-1], abs_err=1e-6, rel_err=1e-6)
+        print(f"{algorithm=}, {root=}, {number_of_iterations=}")
+
+    print()
+    # Assignment 2c
+    x = np.linspace(-2.0, 0.0, num=1000)
+    for algorithm in algorithm_list:
+        root, number_of_iterations = algorithm(func2c, x[0], x[-1], abs_err=1e-6, rel_err=1e-6)
+        print(f"{algorithm=}, {root=}, {number_of_iterations=}")
+
+    print()
+    # Assignment 2d
+    x = np.linspace(0.0, 1.5, num=1000)
+    for algorithm in algorithm_list:
+        root, number_of_iterations = algorithm(func2d, x[0], x[-1], abs_err=1e-6, rel_err=1e-6)
+        print(f"{algorithm=}, {root=}, {number_of_iterations=}")
+
+    plt.show()
 
 
 main()
