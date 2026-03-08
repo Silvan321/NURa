@@ -46,9 +46,10 @@ def quicksort(A: Sequence):
         i = 0
         j = N - 1
 
-        conda, condb = sub_a[i] >= x_pivot, sub_a[j] <= x_pivot
-        if conda and condb:
+        conda, condb = sub_a[i] >= x_pivot, sub_a[j] <= x_pivot  # Define these conditions as variables to avoid evaluating them unnecessarily many times!
+        if conda and condb:  # Conditions might already be True in initial state, swap if so
             swap(sub_a, i, j)
+            conda, condb = False, False
         while (not conda) or (not condb):
             # i goes up from 0 until a[i]>=x_pivot
             if not conda:
@@ -58,7 +59,7 @@ def quicksort(A: Sequence):
             if not condb:
                 j -= 1
                 condb = sub_a[j] <= x_pivot
-            # pointers have crossed. If we don't check this size-2 subarrays will flip wrongly!
+            # pointers have crossed. If we don't check this we will undo all our hard work: the elements that we have swapped will be swapped back. Also, size-2 subarrays will flip wrongly!
             if j <= i:
                 break
             # once we meet both conditions, swap the elements and set conditions to false to continue this iteration of the loop
