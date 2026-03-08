@@ -16,7 +16,8 @@ def swap(a, i, j):
 
 def selection_sort(A: MutableSequence, return_index: bool = False):
     """Implement the selection sorting algorithm.
-    If return_index is True, the sorted index array is returned
+    Based on Lecture 6 slide 6.
+    If return_index is True, the sorted index array is returned.
     """
     a = deepcopy(A)
     N = len(a)
@@ -37,7 +38,9 @@ def selection_sort(A: MutableSequence, return_index: bool = False):
 
 
 def quicksort(A: MutableSequence, return_index: bool = False):
-    """Implement the quicksort sorting algorithm."""
+    """Implement the quicksort sorting algorithm.
+    Based on Lecture 6 slide 9.
+    """
     a: MutableSequence = deepcopy(A)
     N = len(a)
     start_indx_fml = [0, N // 2, N - 1]
@@ -100,6 +103,7 @@ def quicksort(A: MutableSequence, return_index: bool = False):
 
 
 def main():
+    # Assignment 1a
     np.random.seed(1)
     A = np.random.randint(0, 100, size=100)  # [3, 27, 43, 10, 9, 82, 38]  # np.random.randint(0, 100, size=20)
     # Assignment 1a: Selection sort
@@ -109,9 +113,11 @@ def main():
     print(A)
     print(A_selection_sorted)
 
+    # Assignment 1b
     A_quicksorted = quicksort(A)
     print(A_quicksorted)
 
+    # Assignment 1c
     N_bounds = (5, 1e4)
     N_bounds_log10 = np.log(N_bounds)
     number_of_values = 6
@@ -142,6 +148,14 @@ def main():
 
     # We see that selection sort is faster when N is relatively small (N<~50).
     # When N becomes larger than 100, quicksort quickly becomes orders of magnitude faster!
+
+    # Assignment 1d
+
+    A_size = len(A_quicksorted)
+    percentiles = [16, 50, 84]
+    for percentile in percentiles:
+        A_percentile = A_quicksorted[int(percentile * A_size / 100)]
+        print(f"{percentile=}, {A_percentile=}")
 
 
 main()
