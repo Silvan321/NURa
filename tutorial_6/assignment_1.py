@@ -1,8 +1,11 @@
 # Sorting and Selection
 
-from collections.abc import Iterable, Sequence
+from collections.abc import MutableSequence
 from copy import deepcopy
+from math import e
+from timeit import timeit
 
+from matplotlib import pyplot as plt
 import numpy as np
 
 
@@ -11,7 +14,7 @@ def swap(a, i, j):
     a[i], a[j] = a[j], a[i]
 
 
-def selection_sort(A: Sequence, return_index: bool = False):
+def selection_sort(A: MutableSequence, return_index: bool = False):
     """Implement the selection sorting algorithm.
     If return_index is True, the sorted index array is returned
     """
@@ -31,15 +34,15 @@ def selection_sort(A: Sequence, return_index: bool = False):
     return a
 
 
-def quicksort(A: Sequence):
+def quicksort(A: MutableSequence):
     """Implement the quicksort sorting algorithm."""
-    a = deepcopy(A)
+    a: MutableSequence = deepcopy(A)
     N = len(a)
     indx_fml = [0, N // 2, N - 1]
-    first_middle_last, start_indices = selection_sort([a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]]], return_index=True)  # take the median of the first, last and middle element as the pivot
+    first_middle_last, _ = selection_sort([a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]]], return_index=True)  # take the median of the first, last and middle element as the pivot
     a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]] = first_middle_last[0], first_middle_last[1], first_middle_last[2]
 
-    def recursive_part(sub_a, sub_start_index):
+    def recursive_part(sub_a: MutableSequence, sub_start_index: int):
         """This inner function is called recursively to sort smaller and smaller subarrays."""
         N = len(sub_a)
         x_pivot = sub_a[N // 2]  # since N will become smaller once we apply this step recursively, we don't hardcode this
@@ -91,7 +94,7 @@ def quicksort(A: Sequence):
 
 def main():
     np.random.seed(1)
-    A = [3, 27, 43, 10, 9, 82, 38]  # np.random.randint(0, 100, size=20)
+    A = np.random.randint(0, 100, size=100)  # [3, 27, 43, 10, 9, 82, 38]  # np.random.randint(0, 100, size=20)
     # Assignment 1a: Selection sort
     # The disadvantage of this algorithm is it uses O(N^2) comparisons (and O(N) swaps)
     # It is also not stable (although I would think that the first occurence of certain value is placed at the front)
@@ -101,6 +104,37 @@ def main():
 
     A_quicksorted = quicksort(A)
     print(A_quicksorted)
+
+    N_bounds = (5, 1e4)
+    N_bounds_log10 = np.log(N_bounds)
+    number_of_values = 6
+    N_values_log10 = np.linspace(start=N_bounds_log10[0], stop=N_bounds_log10[1], num=number_of_values)
+    N_values = [int(N) for N in e**N_values_log10]
+    x = range(number_of_values)
+
+    print(f"{N_values=}")
+    plt.figure()
+    plt.title("N values equally spaced in log space\n We only go up to 1e4 to prevent the runtime for selection sort taking forever")
+    plt.scatter(x, N_values)
+    plt.yscale("log")
+    plt.show()
+
+    # compute times
+    computation_number = 1
+
+    sorting_algorithms = [selection_sort, quicksort]
+    timing_array = np.zeros((len(N_values), len(sorting_algorithms)))
+
+    for i, N in enumerate(N_values):
+        A = np.random.randint(0, 100, size=N)
+        for j, sorting_algorithm in enumerate(sorting_algorithms):
+            time = timeit(stmt=lambda: sorting_algorithm(A), number=computation_number) / computation_number
+            timing_array[i, j] = time
+            print(f"{N=}, {sorting_algorithm=} combinations takes {time} seconds")
+        print()
+
+    # We see that selection sort is faster when N is relatively small (N<~50).
+    # When N becomes larger than 100, quicksort quickly becomes orders of magnitude faster!
 
 
 main()

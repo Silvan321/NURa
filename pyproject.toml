@@ -46,6 +46,11 @@ ignore = [
     "TC003",
     "T201", # Allow prints
 
+    "FBT001", # boolean typed parameters in function definitions
+    "FBT002",
+
+    "C901", # Function to complex
+
     # error messages
     "EM101",
     "EM102",
