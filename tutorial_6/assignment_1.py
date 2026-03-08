@@ -20,7 +20,8 @@ def selection_sort(A: MutableSequence, return_index: bool = False):
     """
     a = deepcopy(A)
     N = len(a)
-    index_a = np.arange(N)
+    if return_index:
+        index_a = np.arange(N)
     for i in range(N - 1):
         i_min = i
         for j in range(i + 1, N):
@@ -28,22 +29,31 @@ def selection_sort(A: MutableSequence, return_index: bool = False):
                 i_min = j
         if i_min != i:
             swap(a, i, i_min)
-            swap(index_a, i, i_min)
+            if return_index:
+                swap(index_a, i, i_min)
     if return_index:
         return a, index_a
     return a
 
 
-def quicksort(A: MutableSequence):
+def quicksort(A: MutableSequence, return_index: bool = False):
     """Implement the quicksort sorting algorithm."""
     a: MutableSequence = deepcopy(A)
     N = len(a)
-    indx_fml = [0, N // 2, N - 1]
-    first_middle_last, _ = selection_sort([a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]]], return_index=True)  # take the median of the first, last and middle element as the pivot
-    a[indx_fml[0]], a[indx_fml[1]], a[indx_fml[2]] = first_middle_last[0], first_middle_last[1], first_middle_last[2]
+    start_indx_fml = [0, N // 2, N - 1]
+    if return_index:
+        index_a = np.arange(N)
+    first_middle_last, indx_fml = selection_sort(
+        [a[start_indx_fml[0]], a[start_indx_fml[1]], a[start_indx_fml[2]]], return_index=True
+    )  # take the median of the first, last and middle element as the pivot
+    a[start_indx_fml[0]], a[start_indx_fml[1]], a[start_indx_fml[2]] = first_middle_last[0], first_middle_last[1], first_middle_last[2]
+    if return_index:
+        index_a[start_indx_fml[0]], index_a[start_indx_fml[1]], index_a[start_indx_fml[2]] = indx_fml[0], indx_fml[1], indx_fml[2]
 
     def recursive_part(sub_a: MutableSequence, sub_start_index: int):
-        """This inner function is called recursively to sort smaller and smaller subarrays."""
+        """This inner function is called recursively to sort smaller and smaller subarrays.
+        sub_start_index tells the inner function where this specific subarray started, and therefore where its sorted values should be placed in the total array.
+        """
         N = len(sub_a)
         x_pivot = sub_a[N // 2]  # since N will become smaller once we apply this step recursively, we don't hardcode this
         i = 0
@@ -87,9 +97,6 @@ def quicksort(A: MutableSequence):
 
     a = recursive_part(a, 0)
     return a
-
-
-# keep indices of full array, to pass to recursive arrays
 
 
 def main():
