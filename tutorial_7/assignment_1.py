@@ -42,27 +42,39 @@ def bracket_minimum(func: Callable, a: float, b: float) -> tuple[float, float, f
         fa, fb = fb, fc
 
 
-def golden_section_search(func: Callable, a: float, b: float, c: float, target_acc: float) -> float:
+def golden_section_search(func: Callable, a: float, b: float, c: float, target_acc: float = (np.finfo(float).eps) ** 0.5) -> float:
     """Iteratively tighten a 3 point bracket surrounding a minimum. This function assumes there is only 1 minimum inside the bracket.
     Use the algorithm defined in lecture 7 slide 10.
     """
     phi = (1 + math.sqrt(5)) / 2  # Golden ratio
     w = 2 - phi
-    c_min_b, b_min_a, c_min_a = abs(c - b), abs(b - a), abs(c - a)
-    if c_min_b > b_min_a:
-        larger_interval = c_min_b
-        other_edge = c
-    else:
-        larger_interval = b_min_a
-        other_edge = a
-    d = b + (other_edge - b) * w
-    if c_min_a < target_acc:
-        if func(d) < func(b):
-            return d
-        else:
+    c_min_b, b_min_a = abs(c - b), abs(b - a)
+    other_edge = c if c_min_b > b_min_a else a  # Step 1
+    while True:
+        d = b + (other_edge - b) * w
+        fb, fd = func(b), func(d)
+        if abs(c - a) < target_acc:  # Step 2
+            if fd < fb:
+                return d
             return b
-
-    return
+        if fd < fb:  # Step 3
+            if b < d < c:
+                a, b = b, d
+                c_min_b, b_min_a = abs(c - b), abs(b - a)  # I need more lines for the various cases,
+                other_edge = c if c_min_b > b_min_a else a  # but it is more efficient because I do not always have to recompute both intervals and check which value should become other_edge
+            else:
+                c, b = b, d
+                c_min_b, b_min_a = abs(c - b), abs(b - a)
+                other_edge = c if c_min_b > b_min_a else a
+        else:  # Step 4
+            if b < d < c:
+                c = d
+                c_min_b = abs(c - b)  # Step 5 optimization: only recompute tightened interval. Here larger interval is b_min_a
+                other_edge = a
+            else:
+                a = d
+                b_min_a = abs(b - a)
+                other_edge = c
 
 
 def main():
@@ -74,6 +86,9 @@ def main():
 
     bracket_1a = bracket_minimum(func=func1a, a=-9, b=-3)
     print(f"{bracket_1a=}")
+
+    golden_minimum_1a = golden_section_search(func1a, bracket_1a[0], bracket_1a[1], bracket_1a[2])
+    print(f"{golden_minimum_1a=}")
 
 
 main()

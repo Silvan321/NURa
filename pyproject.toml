@@ -81,6 +81,7 @@ ignore = [
 
     # comparison
     "PLR2004",
+    "PLR5501",
 
     # method signature
     "PLR0911",
