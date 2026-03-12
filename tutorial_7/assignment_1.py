@@ -13,18 +13,55 @@ def func1a(x):
 
 
 def bracket_minimum(func: Callable, a: float, b: float) -> tuple[float, float, float]:
-    """Use the algorithm on lecture 7 slide to find a a 3 point bracket for a function bracketing exactly 1 minimum"""
-    phi = (1 + math.sqrt(5)) / 2
+    """Use the algorithm on lecture 7 slide to find a a 3 point bracket for a function.
+    Note that depending on the function and initial guess for a and b, this function is not guaranteed to find a bracket for only 1 minimum!
+    There is no way to know this without evaluating the function at many points. This is why we have to restart often.
+    """
+    phi = (1 + math.sqrt(5)) / 2  # Golden ratio
     fa, fb = func(a), func(b)
-    if fb < fa:  # Step 1: ensure f(b) < f(a)
+    if fb > fa:  # Step 1: ensure f(b) < f(a)
         fa, fb = fb, fa
         a, b = b, a
     c = b + (b - a) * phi  # Step 2
-    if (fc := func(c)) > fb:  # Step 3a
-        return (a, b, c)
-    # Step 3b: fit a polynomial. for this we can use LU Decomposition of a Vandermonde matrix
-    # OR (since the minimum of the polynomial can be analytically defined using a,b,c and fa,fb,fc), we use the formula for this on slide 11 (Brent's method)
-    d = b - 0.5 * (b - a) ** 2 * (fb - fc) - (b - c) ** 2 * (fb - fa) / ((b - a) * (fb - fc) - (b - c) * (fb - fa))
+    while True:
+        if (fc := func(c)) > fb:  # Step 3a
+            return (a, b, c)
+        # Step 3b: fit a polynomial. for this we can use LU Decomposition of a Vandermonde matrix
+        # OR (since the minimum of the polynomial can be analytically defined using a,b,c and fa,fb,fc), we use the formula for this on slide 11 (Brent's method)
+        d = b - 0.5 * (b - a) ** 2 * (fb - fc) - (b - c) ** 2 * (fb - fa) / ((b - a) * (fb - fc) - (b - c) * (fb - fa))
+        fd = func(d)
+        if b < d < c:
+            if fd < fc:  # Step 4
+                return (b, d, c)
+            if fd > fb:
+                return (a, b, d)
+            d = c + (c - b) * phi
+        else:  # Step 5
+            d = c + (c - b) * phi
+        a, b, c = b, c, d
+        fa, fb = fb, fc
+
+
+def golden_section_search(func: Callable, a: float, b: float, c: float, target_acc: float) -> float:
+    """Iteratively tighten a 3 point bracket surrounding a minimum. This function assumes there is only 1 minimum inside the bracket.
+    Use the algorithm defined in lecture 7 slide 10.
+    """
+    phi = (1 + math.sqrt(5)) / 2  # Golden ratio
+    w = 2 - phi
+    c_min_b, b_min_a, c_min_a = abs(c - b), abs(b - a), abs(c - a)
+    if c_min_b > b_min_a:
+        larger_interval = c_min_b
+        other_edge = c
+    else:
+        larger_interval = b_min_a
+        other_edge = a
+    d = b + (other_edge - b) * w
+    if c_min_a < target_acc:
+        if func(d) < func(b):
+            return d
+        else:
+            return b
+
     return
 
 
@@ -35,7 +72,8 @@ def main():
     plt.plot(x, func1a(x))
     plt.show()
 
-    bracket_minimum(func=func1a, a=-9, b=-7)
+    bracket_1a = bracket_minimum(func=func1a, a=-9, b=-3)
+    print(f"{bracket_1a=}")
 
 
 main()
