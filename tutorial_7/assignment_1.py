@@ -7,9 +7,16 @@ from collections.abc import Callable
 import numpy as np
 from matplotlib import pyplot as plt
 
+# if you need to switch a and b in the first step of the algorithm, then the a,b,c returned by the routine are actually c,b,a – so swap a and c in this case.
+# Alternatively, start your bracketed minimization routine by checking whether a,b,c are in the right order (and fix it if not).
+
 
 def func1a(x):
     return x**4 + 10 * x**3 + 10 * (x - 2) ** 2
+
+
+def func1b(x):
+    return np.cos(x) + x**2 / 20
 
 
 def bracket_minimum(func: Callable, a: float, b: float) -> tuple[float, float, float]:
@@ -19,13 +26,16 @@ def bracket_minimum(func: Callable, a: float, b: float) -> tuple[float, float, f
     """
     phi = (1 + math.sqrt(5)) / 2  # Golden ratio
     fa, fb = func(a), func(b)
+    switched_ab = False
     if fb > fa:  # Step 1: ensure f(b) < f(a)
         fa, fb = fb, fa
         a, b = b, a
+        switched_ab = True
     c = b + (b - a) * phi  # Step 2
     while True:
         if (fc := func(c)) > fb:  # Step 3a
-            return (a, b, c)
+            return (c, b, a) if switched_ab else (a, b, c)
+
         # Step 3b: fit a polynomial. for this we can use LU Decomposition of a Vandermonde matrix
         # OR (since the minimum of the polynomial can be analytically defined using a,b,c and fa,fb,fc), we use the formula for this on slide 11 (Brent's method)
         d = b - 0.5 * (b - a) ** 2 * (fb - fc) - (b - c) ** 2 * (fb - fa) / ((b - a) * (fb - fc) - (b - c) * (fb - fa))
@@ -42,7 +52,7 @@ def bracket_minimum(func: Callable, a: float, b: float) -> tuple[float, float, f
         fa, fb = fb, fc
 
 
-def golden_section_search(func: Callable, a: float, b: float, c: float, target_acc: float = (np.finfo(float).eps) ** 0.5) -> float:
+def golden_section_search(func: Callable, a: float, b: float, c: float, target_acc: float = (np.finfo(float).eps) ** 0.5, max_num_iterations: int = 50) -> tuple[None | float, int]:
     """Iteratively tighten a 3 point bracket surrounding a minimum. This function assumes there is only 1 minimum inside the bracket.
     Use the algorithm defined in lecture 7 slide 10.
     """
@@ -50,13 +60,14 @@ def golden_section_search(func: Callable, a: float, b: float, c: float, target_a
     w = 2 - phi
     c_min_b, b_min_a = abs(c - b), abs(b - a)
     other_edge = c if c_min_b > b_min_a else a  # Step 1
-    while True:
+    iteration = 1
+    while iteration < max_num_iterations:
         d = b + (other_edge - b) * w
         fb, fd = func(b), func(d)
         if abs(c - a) < target_acc:  # Step 2
             if fd < fb:
-                return d
-            return b
+                return d, iteration
+            return b, iteration
         if fd < fb:  # Step 3
             if b < d < c:
                 a, b = b, d
@@ -75,20 +86,36 @@ def golden_section_search(func: Callable, a: float, b: float, c: float, target_a
                 a = d
                 b_min_a = abs(b - a)
                 other_edge = c
+        iteration += 1
+    return None, iteration
 
 
 def main():
-    x = np.linspace(-10, 10, num=100)
+    x_1a = np.linspace(-10, 10, num=1000)
+    x_1b = np.linspace(-20, 20, num=2000)
 
     plt.figure()
-    plt.plot(x, func1a(x))
-    plt.show()
+    plt.title("Function f(x) for question 1a")
+    plt.plot(x_1a, func1a(x_1a))
 
-    bracket_1a = bracket_minimum(func=func1a, a=-9, b=-3)
+    plt.figure()
+    plt.title("Function g(x) for question 1b")
+    plt.plot(x_1b, func1b(x_1b))
+
+    bracket_1a = bracket_minimum(func=func1a, a=-9, b=-7)
     print(f"{bracket_1a=}")
 
-    golden_minimum_1a = golden_section_search(func1a, bracket_1a[0], bracket_1a[1], bracket_1a[2])
-    print(f"{golden_minimum_1a=}")
+    golden_minimum_1a, num_iterations_1a = golden_section_search(func1a, bracket_1a[0], bracket_1a[1], bracket_1a[2])
+    print(f"{golden_minimum_1a=}, {num_iterations_1a=}")
+
+    bracket_1b = bracket_minimum(func=func1b, a=-9, b=-7)
+    print(f"{bracket_1b=}")
+
+    golden_minimum_1b, num_iterations_1b = golden_section_search(func1b, bracket_1b[0], bracket_1b[1], bracket_1b[2])
+    print(f"{golden_minimum_1b=}, {num_iterations_1b=}")
+
+    plt.show()
+    # The number of iterations (and answer to everything) is for both 1a and 1b 42 :D
 
 
 main()
