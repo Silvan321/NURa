@@ -34,6 +34,19 @@ def rng_64bit_xor_shift(x: np.uint64 = np.uint64(123456789), a_iter: Iterable[np
     return random_values_array
 
 
+def lcg(x: np.uint64 = np.uint64(123456789), a: np.uint64 = np.uint64(7654321), c: np.uint64 = np.uint64(3333333), m: np.uint64 = np.uint64(1234543212345), size: int = 1):
+    """Implement a (Multiple) Linear Congruential Generator.
+    When c=0 we are dealing with a MLCG.
+    This RNG is bad on its own but a good building block for more complex RNGs.
+    """
+    x, a, c, m = np.uint64(x), np.uint64(a), np.uint64(c), np.uint64(m)  # Cast to unsigned integers should user forget to do so
+    random_values_array = np.zeros(size, dtype=np.uint64)
+    for i in range(len(random_values_array)):
+        x = (a * x + c) % m
+        random_values_array[i] = x
+    return random_values_array
+
+
 def theta_phi_1a(P1, P2):
     theta = pi * P1
     phi = 2 * pi * P2
@@ -52,6 +65,10 @@ def main():
     # Then we get a helix with the shape theta = 2 phi
     P_64 = rng_64bit_xor_shift(size=100)
     print(P_64)
+
+    P_lcg = lcg(size=100)
+    print(P_lcg)
+
     P_u1 = np.random.uniform(0, 1, size=num_points)
     P_u2 = np.random.uniform(0, 1, size=num_points)
     r = np.ones(num_points)

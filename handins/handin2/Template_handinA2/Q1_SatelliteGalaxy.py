@@ -1,12 +1,11 @@
 # imports
-from functools import partial
-from math import pi
-from typing import Callable
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
+def n(
+    x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float
+) -> float | np.ndarray:
     """
     Number density profile of satellite galaxies
 
@@ -37,35 +36,42 @@ def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float
 ##### Integrator block #####
 
 
-def trapezoid(a, b, func, N: int):
-    """Use the extended trapezoid rule to calculate the integral.
-    Parameters a and b are start and stop x values of the range to be integrated respectively.
-    func is the function to be evaluated.
-    N is the number of evaluations.
+# Below we provide a template for romberg integration
+# You can implement this or use another integration method based on some form of Richardson extrapolation
+def romberg_integrator(
+    func: callable, bounds: tuple, order: int = 5, err: bool = False, args: tuple = ()
+) -> float | tuple[float, float]:
     """
-    xdata = np.linspace(a, b, num=N)
-    h = (b - a) / N  # step size
-    return h * (0.5 * (func(b) + func(a)) + np.sum(func(xdata[1:-1])))
+    Romberg integration method
 
+    Parameters
+    ----------
+    func : callable
+        Function to integrate.
+    bounds : tuple
+        Lower- and upper bound for integration.
+    order : int, optional
+        Order of the integration.
+        The default is 5.
+    err : bool, optional
+        Whether to retun first error estimate.
+        The default is False.
+    args : tuple, optional
+        Arguments to be passed to func.
+        The default is ().
 
-def romberg_vector_version(a, b, func, N_start: int, order: int = 5, return_error: bool = False):
-    """See slide 14 of Lecture 4 annotated slides for the formula used.
-    N_start is the initial number of function evaluations. This will double with every order.
-    order is the number of initial approximations.
-    We return the best estimate for the integral stored at r_0
-    If return_error is True, the error estimate abs(r_0 - r_1) is also returned
+    Returns
+    -------
+    float
+        Value of the integral. If err=True, returns the tuple
+        (value, err), with err a first estimate of the (relative)
+        error.
     """
-    romberg_vector = np.zeros(shape=order)
-    for j in range(order):
-        for i in range(order - j):
-            if j == 0:  # the first time we fill the column, we use the trapezoid rule with doubling step sizes per row entry
-                N = (2**i) * N_start  # number of intervals doubles with each depth
-                romberg_vector[i] = trapezoid(a, b, func, N)
-            else:  # Subsequent times we use the update rule
-                romberg_vector[i] = (4**j * romberg_vector[i + 1] - romberg_vector[i]) / (4**j - 1)  # General version of 4/3 S_1 - 1/3 S_0
-    if return_error:
-        return romberg_vector[0], abs(romberg_vector[0] - romberg_vector[1])  # (value, error)
-    return romberg_vector[0]
+    # TODO: implement Romberg integration method
+
+    if err:
+        return 0.0, 0.0  # (value, error)
+    return 0.0
 
 
 #### Sampler block ####
@@ -160,7 +166,9 @@ def choice(arr: np.ndarray, size: int = 1) -> np.ndarray:
 ##### Derivative block #####
 
 
-def dn_dx(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
+def dn_dx(
+    x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float
+) -> float | np.ndarray:
     """
     Analytical derivative of number density provide
 
@@ -189,7 +197,9 @@ def dn_dx(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: f
     return 0.0
 
 
-def finite_difference(function: callable, x: float | np.ndarray, h: float) -> float | np.ndarray:
+def finite_difference(
+    function: callable, x: float | np.ndarray, h: float
+) -> float | np.ndarray:
     """
     A building block to compute derivative using finite differences
 
@@ -241,10 +251,6 @@ def compute_derivative(
     return 0.0
 
 
-def general_integrand(x: np.ndarray, a: float, b: float, c: float) -> Callable:
-    return x**2 * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
-
-
 def main():
 
     # Values from the hand-in
@@ -252,41 +258,59 @@ def main():
     b = 0.25
     c = 1.6
     Nsat = 100
-    bounds = (1e-20, 5)  # Use 1e-20 for the lower bound of the integral, because Python complains if we raise 0 to a negative power (a-3 = 2.4-3 = -0.6)
+    bounds = (0, 5)
     xmin, xmax = 10**-4, 5
     N_generate = 10000
     xx = np.linspace(xmin, xmax, N_generate)
 
-    specific_integrand = partial(general_integrand, a=a, b=b, c=c)  # Use a partial function to set a, b and c to the given values in the general integrand, but still keep it as a function
-    integral, err = romberg_vector_version(a=bounds[0], b=bounds[1], func=specific_integrand, N_start=100, order=5, return_error=True)
+    integrand = lambda x, a, b, c: 0.0  # insert the correct function
+    integral, err = romberg_integrator(
+        integrand, bounds, order=2, args=(a, b, c), err=True
+    )
 
     # Normalisation
-    A = 1 / (4 * pi * integral)  # to be computed
+    A = 1.0  # to be computed
     with open("Calculations/satellite_A.txt", "w") as f:
         f.write(f"{A:.12g}\n")
     integrand = lambda x, a, b, c: 0.0  # replace by the correct function
-    integrated_Nsat = 0.0  # replace by the correct integral, e.g. by calling your integrator
+    integrated_Nsat = (
+        0.0  # replace by the correct integral, e.g. by calling your integrator
+    )
 
-    p_of_x = lambda x: 0.0  # replace by the normalised distribution of satellite galaxies as a function of x
+    p_of_x = (
+        lambda x: 0.0
+    )  # replace by the normalised distribution of satellite galaxies as a function of x
 
     # Numerically determine maximum to normalize p(x) for sampling
     pmax = 0.0  # replace by taking the maximum value of p_of_x
 
     p_of_x_norm = lambda x: 0.0  # replace by the normalised distribution
-    random_samples = np.zeros(N_generate)  # replace by your sampler(p_of_x_norm, min=xmin, max=xmax, Nsamples=N_generate, args=())
+    random_samples = np.zeros(
+        N_generate
+    )  # replace by your sampler(p_of_x_norm, min=xmin, max=xmax, Nsamples=N_generate, args=())
 
     edges = 10 ** np.linspace(np.log10(xmin), np.log10(xmax), 21)
 
-    hist = np.histogram(xmin + np.sort(np.random.rand(N_generate)) * (xmax - xmin), bins=edges)[0]  # replace!
-    hist_scaled = 1e-3 * hist  # replace; this is NOT what you should be plotting, this is just a random example to get a plot with reasonable y values (think about how you *should* scale hist)
+    hist = np.histogram(
+        xmin + np.sort(np.random.rand(N_generate)) * (xmax - xmin), bins=edges
+    )[
+        0
+    ]  # replace!
+    hist_scaled = (
+        1e-3 * hist
+    )  # replace; this is NOT what you should be plotting, this is just a random example to get a plot with reasonable y values (think about how you *should* scale hist)
 
     fig = plt.figure()
     relative_radius = edges.copy()  # replace!
     analytical_function = edges.copy()  # replace
 
     fig1b, ax = plt.subplots()
-    ax.stairs(hist_scaled, edges=edges, fill=True, label="Satellite galaxies")  # just an example line, correct this!
-    plt.plot(relative_radius, analytical_function, "r-", label="Analytical solution")  # correct this according to the exercise!
+    ax.stairs(
+        hist_scaled, edges=edges, fill=True, label="Satellite galaxies"
+    )  # just an example line, correct this!
+    plt.plot(
+        relative_radius, analytical_function, "r-", label="Analytical solution"
+    )  # correct this according to the exercise!
     ax.set(
         xlim=(xmin, xmax),
         ylim=(10 ** (-3), 10),  # you may or may not need to change ylim

@@ -194,6 +194,7 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\s
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm5.tfm
+INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT .\Calculations\satellite_A.txt
 INPUT .\Calculations\satellite_A.txt
 INPUT Calculations\satellite_A.txt
@@ -205,7 +206,6 @@ INPUT .\Code\satellites_integrator_code.txt
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt8.tfm
 INPUT Code\satellites_integrator_code.txt
-INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT .\Plots\my_solution_1b.png
 INPUT .\Plots\my_solution_1b.png
 INPUT .\Plots\my_solution_1b.png
@@ -273,6 +273,8 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr5.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr7.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr7.pfb
+INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
+INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy7.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy7.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti10.pfb

@@ -62,17 +62,27 @@ Describe how you implemented the spherical volume element \(dV\).
 
 The spherical volume element \(dV\) can be defined as follows:
 We know that the volume can be computed in spherical coordinates using the triple integral
-\begin{equation}
-  \iiint_V f(r,\theta,\phi)\, r^2 \sin\theta \, dr\,d\theta\,d\phi = \int_{\phi=0}^{2\pi} \int_{\theta=0}^{\pi} \int_{r=0}^{r_{max}}
-\end{equation}
-Since n(x) where x is the radius relative to virial radius x=r/rvir is only dependent on r, we get
-\begin{equation}
-  \iiint_V n(x)\, r^2 \sin\theta \, dr\,d\theta\,d\phi =
-\end{equation}
+\begin{align}
+  \iiint_V n(x) dV & = \int_{\phi=0}^{2\pi} \int_{\theta=0}^{\pi} \int_{r=0}^{r_{max}} n(x) r^2 \sin\theta \, dr\,d\theta\,d\phi                                                \\
+                   & = 4 \pi A \langle N_{sat} \rangle \int_{x=0}^{x_{max}=5} x^2 \left(\frac{x}{b}\right)^{a-3} \exp(-\left(\frac{x}{b}\right)^c) dx = \langle N_{sat} \rangle \\
+  -> A             & = \frac{1}{4 \pi \int_{x=0}^{x_{max}=5} x^2 \left(\frac{x}{b}\right)^{a-3} \exp(-\left(\frac{x}{b}\right)^c) dx}
+\end{align}
+Since n(x) where x is the radius relative to virial radius \(x=r/r_{vir}\) is only dependent on r, we can easily solve for \(\theta\) and \(\phi\).
+Dividing by \(\langle N_{sat} \rangle\) on both sides and rearranging gives us an expression for \(A\).
+
+Next we use Romberg integration (i.e. Richardson extrapolation applied to integration) to numerically integrate the integral in the expression.
+Romberg integration first applies the extended trapezoid rule for N intervals, then 2N, 4N, ... up to $2^m\times$ N intervals, where m is the order of the initial approximations.
+Next we use the fact that each successive order's leading error term is exactly a 1/4 times the leading error term of the previous order.
+Subtracting the two approximations from each other in such a way as to cancel the leading error term results in m-1 new approximations.
+We can do this subtraction trick m-1 times. Since after each subtraction we no longer need the two values used for this, we can store the initial approximations and all subsequent improvements in a vector of length m.
+At the end of the algorithm the first element of the vector contains the best estimate of the integral and the best estimate for the error is the absolute difference between the first two elements.
+Table~\ref{table_A_constant} shows the value of the normalization constant \(A\) to full precision.
+
 
 \begin{table}[H]
   \centering
   \caption{Normalization constant of the satellite galaxy profile.}
+  \label{table_A_constant}
   \begin{tabular}{|c|}
     \hline
     Normalization constant \(A\)     \\
