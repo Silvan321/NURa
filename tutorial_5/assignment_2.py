@@ -7,8 +7,31 @@
 
 
 from math import pi
-from matplotlib import pyplot as plt
+from collections.abc import Iterable
+
 import numpy as np
+from matplotlib import pyplot as plt
+
+
+def rng_64bit_xor_shift(x: np.uint64 = np.uint64(123456789), a_iter: Iterable[np.uint64] = (np.uint64(21), np.uint64(35), np.uint64(4)), size: int = 1):
+    """Use the 64-bit XOR-shift method for making a Random Number Generator on slide 14 of lecture 5.
+    x is the seed, which should be an unsigned 64 bit integer, not 0.
+    We use a numpy variable, as Python built-in variables will automatically extend if bits are moved out of range (which is what we want to use here: moving bits out of range hides info for the user).
+    a is an iterable of ints containing the coefficients that will be used to bitshift x by a certain amount before doing an XOR operation with itself.
+    Size is the number of random numbers generated.
+    """
+    x = np.uint64(x)
+    a_list = [np.uint64(a) for a in a_iter]  # Convert all coefficients to np.uint64 variables once, to ensure no error occurs if the user does not supply these in np.uint64 format
+    if x == 0:
+        raise ValueError("x cannot have 0 as a starting value")
+
+    random_values_array = np.zeros(size, dtype=np.uint64)
+    for i in range(len(random_values_array)):
+        for j, a in enumerate(a_list):
+            x = x ^ (x >> a) if j % 2 == 0 else x ^ (x << a)  # Even coefficients are used to shift x a bits to the right, odd coefficients are used to shift x a bits to the left
+            # This is necessary to ensure randomness: otherwise we would only be changing e.g. the lower significant bits, and numbers would oscillate around the starting seed value
+        random_values_array[i] = x
+    return random_values_array
 
 
 def theta_phi_1a(P1, P2):
@@ -27,6 +50,8 @@ def main():
     num_points = 1000
     # We need TWO DIFFERENT random number generators, otherwise every theta, phi pair uses the same random number
     # Then we get a helix with the shape theta = 2 phi
+    P_64 = rng_64bit_xor_shift(size=100)
+    print(P_64)
     P_u1 = np.random.uniform(0, 1, size=num_points)
     P_u2 = np.random.uniform(0, 1, size=num_points)
     r = np.ones(num_points)
