@@ -61,9 +61,6 @@ def main():
     y_1a = r * np.sin(theta_1a) * np.sin(phi_1a)
     z_1a = r * np.cos(theta_1a)
 
-    radius_check = x_1a**2 + y_1a**2 + z_1a**2
-    print(radius_check)
-
     ax = plt.figure().add_subplot(projection="3d")
     ax.scatter(x_1a, y_1a, z_1a)
 
@@ -71,9 +68,6 @@ def main():
     x_1b = r * np.sin(theta_1b) * np.cos(phi_1b)
     y_1b = r * np.sin(theta_1b) * np.sin(phi_1b)
     z_1b = r * np.cos(theta_1b)
-
-    radius_check = x_1b**2 + y_1b**2 + z_1b**2
-    print(radius_check)
 
     ax = plt.figure().add_subplot(projection="3d")
     ax.scatter(x_1b, y_1b, z_1b)
