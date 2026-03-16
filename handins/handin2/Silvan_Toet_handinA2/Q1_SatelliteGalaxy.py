@@ -155,7 +155,7 @@ def sampler(
         Values sampled from dist, shape (Nsamples,)
     """
 
-    # Scale p(x) top to 1
+    # Scale p(x) top to 1. So basically divide n_x (or p_x??) by its maximum value
     # Generate a random number from the distribution that we want a value from, so n(x) in our case
     # Then generate a separate random number from a uniform distribution [0,1), which we interpret as the probability
     # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
