@@ -101,8 +101,8 @@ def quicksort(A: MutableSequence, return_index: bool = False):
     return a
 
 
-def choice(arr: np.ndarray, size: int = 1) -> np.ndarray:
-    """Choose given number of random elements from an array, without replacement
+def choice(array_size: int, number_of_samples: int = 1) -> np.ndarray:
+    """Choose given number of random indices for an array, without replacement
     We use the Hull-Dobell theorem for Linear Congruential Generators, which ensures all values up to the period m are generated exactly once before the sequence repeats.
     Note that the set values for a and c have been set manually to satisfy Hull-Dobell for an array of size 10000.
 
@@ -119,4 +119,4 @@ def choice(arr: np.ndarray, size: int = 1) -> np.ndarray:
     chosen : ndarray
         Randomly chosen elements from arr, shape (size,)
     """
-    return lcg(a=21, c=37, m=arr.size, size=size)
+    return lcg(a=21, c=37, m=array_size, size=number_of_samples)

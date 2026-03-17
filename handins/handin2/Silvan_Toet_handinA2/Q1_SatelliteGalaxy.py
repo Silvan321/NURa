@@ -79,18 +79,21 @@ def main():
 
     # Numerically determine maximum to normalize p(x) for sampling
     # Since this assigment doesn't cover material from lecture 7 maximization I don't use the methods described there
-    pmax = max(np.linspace(xmin, xmax, N_generate), key=lambda x: n(x, A, Nsat, a, b, c))
+    x_max = max(np.linspace(xmin, xmax, N_generate), key=lambda x: n(x, A, Nsat, a, b, c))
+    pmax = n(x_max, A, Nsat, a, b, c)
 
     p_of_x_norm = lambda x: n(x, A, Nsat, a, b, c) / pmax
     random_samples = sampler(p_of_x_norm, xmin, xmax, N_generate)
 
     edges = 10 ** np.linspace(np.log10(xmin), np.log10(xmax), 21)
 
-    hist = np.histogram(xmin + np.sort(random_samples) * (xmax - xmin), bins=edges)[0]  # SHOULD I ALSO SORT THE 10000 SAMPLES IN 1B?
-    hist_scaled = 1e-3 * hist  # replace; this is NOT what you should be plotting, this is just a random example to get a plot with reasonable y values (think about how you *should* scale hist)
+    # Note that we use the density parameter to divide each bin by its width, which is what we are asked to do. This parameter automatically causes the integral/sum of all the bins to add up to 1
+    # So even though we generate 10000 samples, we have to MULTIPLY WITH 100 instead of divide with 100 to correctly scale the histogram, since the average total number of satellites over our range of interest is 100.
+    hist = np.histogram(xmin + random_samples * (xmax - xmin), bins=edges, density=True)[0]
+    hist_scaled = 1e2 * hist
 
-    relative_radius = edges.copy()  # replace!
-    analytical_function = n(relative_radius, A, Nsat, a, b, c)  # replace
+    relative_radius = edges.copy()
+    analytical_function = n(relative_radius, A, Nsat, a, b, c)
 
     plt.figure()
     plt.plot(relative_radius, n(relative_radius, A, Nsat, a, b, c))
@@ -102,7 +105,7 @@ def main():
     plt.plot(relative_radius, analytical_function, "r-", label="Analytical solution")  # correct theiis according to the exercise!
     ax.set(
         xlim=(xmin, xmax),
-        ylim=(10 ** (-3), 10),  # you may or may not need to change ylim
+        ylim=(10 ** (-2), 1000),  # you may or may not need to change ylim
         yscale="log",
         xscale="log",
         xlabel="Relative radius",
@@ -112,15 +115,14 @@ def main():
     plt.savefig("Plots/my_solution_1b.png", dpi=600)
 
     # # Cumulative plot of the chosen galaxies (1c)
-    chosen_indices = choice(np.arange(10000), Nsat)
-
+    chosen_indices = choice(N_generate, Nsat)  # Our choice function generates 100 random indices from the N_generate = 10000 possible options, without rejection or duplication using a full period LCG
     unique_indices = np.unique(chosen_indices)  # I understood from Marcel that for testing our RNG (in this case for generating every value exactly once), it is okay to use built-in functions
     plt.figure()
     plt.title(f"Histogram of chosen indices for {Nsat} points.\n The number of unique indices is {unique_indices.size}")
     plt.hist(chosen_indices)
     plt.savefig("Plots/choice_test.png", dpi=600)
-    chosen = xmin + selection_sort(chosen_indices) * (xmax - xmin)  # scale the 100 selected and sorted random numbers in the range (0,10000) to the range (x_min, x_max)
-    print(chosen)
+    chosen = selection_sort(random_samples[chosen_indices])  #  100 selected and sorted random numbers in the range (0,10000) that act as indices for the larger generated sample of 10000 galaxies
+
     fig1c, ax = plt.subplots()
     ax.plot(chosen, np.arange(100))
     ax.set(

@@ -89,6 +89,7 @@ def sampler(dist: Callable, a: float, b: float, Nsamples: int) -> np.ndarray:
     """
     samples = np.zeros(Nsamples)
     number_of_acquired_samples = 0
+    total_generated_samples = 0
     while number_of_acquired_samples < Nsamples:  # Since we might reject a lot of samples, keep generating samples in batches of Nsamples until we have enough
         P1_uniform = additive_combined_rng(size=Nsamples)  # Generate random numbers for the abscissa range of the distribution that we to sample from
         P_ab = a + (b - a) * P1_uniform  # Scale these to the abscissa range
@@ -96,6 +97,7 @@ def sampler(dist: Callable, a: float, b: float, Nsamples: int) -> np.ndarray:
         for x, y in zip(  # noqa: B905
             P_ab, P2_uniform
         ):  # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
+            total_generated_samples += 1
             if y < dist(x):
                 samples[number_of_acquired_samples] = x
                 number_of_acquired_samples += 1
