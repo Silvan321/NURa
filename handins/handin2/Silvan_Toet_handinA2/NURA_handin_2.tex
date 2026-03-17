@@ -123,7 +123,9 @@ We could not get BigCrush our DieHard to work to thoroughly test our RNG, but we
   \caption{Comparison between the analytical satellite distribution \(N(x)\) and the histogram of 10 000 sampled satellite galaxies in logarithmic bins.}
 \end{figure}
 
-Does your sampled distribution agree with the analytical prediction?
+we calculate the maximum value of n(x) and create a new function scaled to this maximum value. The new function serves as our probability distribution p(x)
+Next we plot our 10000 generated values from this probability distribution. As we can see, the histograms follow the analytical function around the exponential cutoff region.
+However, the sampler seems to undersample values at small radii.
 
 \subsection{Code for sampling}
 
@@ -194,7 +196,21 @@ We have left both algorithms in the code for inspection and will be very happy i
   \end{tabular}
 \end{table}
 
-Do your analytical and numerical derivatives agree? Why?
+Now we compare the analytical derivative of n(x), namely dn(x)/dx, to the numerical derivative.
+Our plan was to use Ridder's method to accurately compute the numerical derivative.
+Ridder's method applies Richardson extrapolation to differentiation.
+We first generate m approximations with decreasing step sizes of h using the central difference method.
+Then we use the update rule
+\begin{equation}
+  D_{i,j} = \frac{d^{2j} D_{i+1, j-1} - D_{i,j-1}}{d^{2j}-1}
+\end{equation}
+To cancel out error terms shared by the approximations.
+This builds a piramide, or more efficiently, a vector, where the first element holds the best approximation of the derivative.
+
+Unfortunately we could not get Ridder's method to work for the numerical derivative.
+We therefore use the central difference method.
+We have included our code for ridder, both in the form for a single x and for the case where x is an array of abscissa values.
+We would appreciate feedback on this as well.
 
 \subsection{Code for derivative calculation}
 

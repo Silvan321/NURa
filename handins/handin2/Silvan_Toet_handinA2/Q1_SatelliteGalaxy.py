@@ -7,7 +7,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from Q1_satellites_derivative import dn_dx
+from Q1_satellites_derivative import central_difference, dn_dx
 from Q1_satellites_integrator import romberg_vector_version
 from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shift, sampler
 from Q1_satellites_selection import choice, quicksort, selection_sort
@@ -61,21 +61,21 @@ def main():
 
     # Normalisation
     A = 1 / (4 * pi * integral)  # to be computed
-    # with open("Calculations/satellite_A.txt", "w") as f:
-    #     f.write(f"{A:.12g}\n")
+    with open("Calculations/satellite_A.txt", "w") as f:
+        f.write(f"{A:.12g}\n")
 
-    # rng_test_size = 100000
-    # P_64 = rng_64bit_xor_shift(size=rng_test_size, scale_uniform=True)
-    # P_lcg = lcg(size=rng_test_size, scale_uniform=True)
-    # P_add = additive_combined_rng(size=rng_test_size, scale_uniform=True)
-    # rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
+    rng_test_size = 100000
+    P_64 = rng_64bit_xor_shift(size=rng_test_size, scale_uniform=True)
+    P_lcg = lcg(size=rng_test_size, scale_uniform=True)
+    P_add = additive_combined_rng(size=rng_test_size, scale_uniform=True)
+    rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
 
-    # fig, axs = plt.subplots(3, 1, figsize=(16, 10))
-    # fig.suptitle(f"Division of generated random numbers of the two sub generators and the combined generator,\nfor {rng_test_size} random numbers, scaled uniformly over 10 bins")
-    # for i, key in enumerate(rngs_dict):
-    #     axs[i].set_title(key)
-    #     axs[i].hist(rngs_dict[key])
-    # plt.savefig("Plots/rng_test.png", dpi=600)
+    fig, axs = plt.subplots(3, 1, figsize=(16, 10))
+    fig.suptitle(f"Division of generated random numbers of the two sub generators and the combined generator,\nfor {rng_test_size} random numbers, scaled uniformly over 10 bins")
+    for i, key in enumerate(rngs_dict):
+        axs[i].set_title(key)
+        axs[i].hist(rngs_dict[key])
+    plt.savefig("Plots/rng_test.png", dpi=600)
 
     # Numerically determine maximum to normalize p(x) for sampling
     # Since this assigment doesn't cover material from lecture 7 maximization I don't use the methods described there
@@ -94,11 +94,6 @@ def main():
 
     relative_radius = edges.copy()
     analytical_function = n(relative_radius, A, Nsat, a, b, c)
-
-    plt.figure()
-    plt.plot(relative_radius, n(relative_radius, A, Nsat, a, b, c))
-    plt.loglog()
-    plt.show()
 
     fig1b, ax = plt.subplots()
     ax.stairs(hist_scaled, edges=edges, fill=True, label="Satellite galaxies")  # just an example line, correct this!
@@ -136,7 +131,7 @@ def main():
 
     x_to_eval = 1
     func_to_eval = lambda x: n(x, A, Nsat, a, b, c)
-    dn_dx_numeric = 0.0  # replace by your derivative, e.g. compute_derivative(func_to_eval, x_to_eval, h_init=0.1)
+    dn_dx_numeric = central_difference(func=func_to_eval, h=0.1, x=x_to_eval)  # I unfortunately could not get Ridder's method to work so I use the central difference method
     dn_dx_analytic = dn_dx(x_to_eval, A, Nsat, a, b, c)
     with open("Calculations/satellite_deriv_analytic.txt", "w") as f:
         f.write(f"{dn_dx_analytic:.12g}\n")
