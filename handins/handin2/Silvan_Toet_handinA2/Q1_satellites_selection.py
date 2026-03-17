@@ -1,6 +1,7 @@
 #### Sorting and Selection block ####
 
 
+from matplotlib import pyplot as plt
 import numpy as np
 from Q1_satellites_sampling import lcg
 
@@ -38,7 +39,8 @@ def sort_array(
 def choice(arr: np.ndarray, size: int = 1) -> np.ndarray:
     """Choose given number of random elements from an array, without replacement
     We use the Hull-Dobell theorem for Linear Congruential Generators, which ensures all values up to the period m are generated exactly once before the sequence repeats.
-    Then we scale the generated values to the size of the array, and use the generated values (converted to ints) as indices from the array
+    Note that the set values for a and c have been set manually to satisfy Hull-Dobell for an array of size 10000.
+
     Parameters
     ----------
     arr : ndarray
@@ -52,10 +54,4 @@ def choice(arr: np.ndarray, size: int = 1) -> np.ndarray:
     chosen : ndarray
         Randomly chosen elements from arr, shape (size,)
     """
-    # first generate 100 random values without duplicates
-    m = 1 << size.bit_length()  # set m to the next power of two larger than size
-    P_uniform = lcg(a=5, c=1, m=m, size=size)  # Since m is a power of two, the values of a and c can stay 5 and 1 respectively and still satisfy Hull-Dobell
-    P_indices = int(
-        arr.size * P_uniform
-    )  # Scale the generated random numbers to the size of the array to sample from, in this case from the array with 10000 generated galaxies in question b. Then convert to int for indices
-    return arr[P_indices]
+    return lcg(a=21, c=37, m=arr.size, size=size)

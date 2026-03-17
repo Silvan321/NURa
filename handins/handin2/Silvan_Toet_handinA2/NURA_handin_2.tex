@@ -145,7 +145,9 @@ The three criteria to be met are:
   \item a - 1 is divisible by all prime factors of m
   \item a - 1 is divisible by 4 if m is divisible by 4
 \end{enumerate}
-We want m$>$100, so choose m = 128 = $2^7$, c = 1 and a = 5.
+We choose m to be the size of the array that we sample from, in our case 10000 which is the number of initally generated satellite galaxies.
+Next we choose a and c to satisfy the above criteria. m has as prime factors 2 and 5. So choose c as odd and not divisible by 5.
+a must be divisible by 2, 4 and 5. We choose a=21 and c=37.
 
 \begin{figure}[H]
   \centering

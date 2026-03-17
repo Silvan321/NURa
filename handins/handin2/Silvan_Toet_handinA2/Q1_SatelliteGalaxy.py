@@ -10,6 +10,7 @@ import numpy as np
 from Q1_satellites_derivative import dn_dx
 from Q1_satellites_integrator import romberg_vector_version
 from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shift
+from Q1_satellites_selection import choice
 
 
 def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
@@ -98,7 +99,7 @@ def main():
 
     fig1b, ax = plt.subplots()
     ax.stairs(hist_scaled, edges=edges, fill=True, label="Satellite galaxies")  # just an example line, correct this!
-    plt.plot(relative_radius, analytical_function, "r-", label="Analytical solution")  # correct this according to the exercise!
+    plt.plot(relative_radius, analytical_function, "r-", label="Analytical solution")  # correct theiis according to the exercise!
     ax.set(
         xlim=(xmin, xmax),
         ylim=(10 ** (-3), 10),  # you may or may not need to change ylim
@@ -111,7 +112,16 @@ def main():
     plt.savefig("Plots/my_solution_1b.png", dpi=600)
 
     # Cumulative plot of the chosen galaxies (1c)
-    chosen = xmin + np.sort(np.random.rand(Nsat)) * (xmax - xmin)  # replace!
+    chosen_indices = choice(np.arange(10000), Nsat)
+
+    unique_indices = np.unique(chosen_indices)  # I understood from Marcel that for testing our RNG (in this case for generating every value exactly once), it is okay to use built-in functions
+    plt.figure()
+    plt.title(f"Histogram of chosen indices for {Nsat} points.\n The number of unique indices is {unique_indices.size}")
+    plt.hist(chosen_indices)
+    plt.savefig("Plots/choice_test.png", dpi=600)
+
+    chosen = xmin + np.sort(chosen_indices) * (xmax - xmin)  # scale the 100 selected and sorted random numbers in the range (0,10000) to the range (x_min, x_max)
+    print(chosen)
     fig1c, ax = plt.subplots()
     ax.plot(chosen, np.arange(100))
     ax.set(
