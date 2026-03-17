@@ -82,7 +82,7 @@ def quicksort(A: MutableSequence, return_index: bool = False):
                 swap(sub_a, i, j)
                 conda, condb = False, False
 
-        sub_a_low, sub_a_high = sub_a[0:i], sub_a[i:N]  # FIX THIS SELECTION CALL FOR LENGTH 2 ARRAYS!
+        sub_a_low, sub_a_high = sub_a[0:i], sub_a[i:N]
         if len(sub_a_low) == 1 and len(sub_a_high) == 1:
             # put at right position in final array
             a[sub_start_index : sub_start_index + 1] = sub_a_low

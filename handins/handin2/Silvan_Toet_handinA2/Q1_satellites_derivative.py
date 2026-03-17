@@ -28,8 +28,7 @@ def dn_dx(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: f
         Same type and shape as x. Derivative of number density of
         satellite galaxies at given radius x.
     """
-    # TODO: Write the analytical derivative of n(x) here
-    return 0.0
+    return A * Nsat * b**3 * (x / b) ** a * np.exp(-((x / b) ** c)) * (-3 + a - c * (x / b) ** c) / x**4
 
 
 def finite_difference(function: callable, x: float | np.ndarray, h: float) -> float | np.ndarray:

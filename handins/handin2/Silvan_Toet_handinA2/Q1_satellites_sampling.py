@@ -1,6 +1,6 @@
 #### Sampler block including RNGs ####
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 import numpy as np
 
@@ -69,21 +69,20 @@ def additive_combined_rng(
 
 
 def sampler(
-    dist: callable,
-    min: float,
-    max: float,
+    dist: Callable,
+    a: float,
+    b: float,
     Nsamples: int,
-    args: tuple = (),
 ) -> np.ndarray:
-    """
-    Sample a distribution using sampling method of your choice
+    """Sample a distribution using sampling method of your choice
 
     Parameters
+    ----------
     dist : callable
         Distribution to sample
-    min :
+    a :
         Minimum value for sampling
-    max : float
+    b : float
         Maximum value for sampling
     Nsamples : int
         Number of samples
@@ -95,15 +94,22 @@ def sampler(
     sample: ndarray
         Values sampled from dist, shape (Nsamples,)
     """
+    dist_max = np.max(dist)  # Scale p(x) top to 1.
+    dist_scaled = dist / dist_max
 
-    # Scale p(x) top to 1. So basically divide n_x (or p_x??) by its maximum value
-    # Generate a random number from the distribution that we want a value from, so n(x) in our case
-    # Then generate a separate random number from a uniform distribution [0,1), which we interpret as the probability
-    # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
-    # First
-
-    P_uniform = additive_combined_rng(size=10000)
-    P_ab = a + (b - a) * P_uniform
-    n_x_scaled = n_x / n_x_max
+    samples = np.zeros(Nsamples)
+    number_of_acquired_samples = 0
+    while number_of_acquired_samples < Nsamples:  # Since we might reject a lot of samples, keep generating samples in batches of Nsamples until we have enough
+        P1_uniform = additive_combined_rng(size=Nsamples)  # Generate random numbers for the abscissa range of the distribution that we to sample from
+        P_ab = a + (b - a) * P1_uniform  # Scale these to the abscissa range
+        P2_uniform = additive_combined_rng(size=Nsamples)  # Then generate a separate random number from a uniform distribution [0,1), which we interpret as the probability
+        for x, y in zip(  # noqa: B905
+            P_ab, P2_uniform
+        ):  # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
+            if y < dist_scaled(x):
+                samples[number_of_acquired_samples] = x
+                number_of_acquired_samples += 1
+            if number_of_acquired_samples >= Nsamples:
+                break
 
     return np.zeros(Nsamples)

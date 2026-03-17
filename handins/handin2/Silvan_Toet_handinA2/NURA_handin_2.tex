@@ -156,12 +156,18 @@ a must be divisible by 2, 4 and 5. We choose a=21 and c=37. The generated indice
   \label{choice_test}
 \end{figure}
 
-Now we sort the 100 selected galaxies using the quicksort algorithm. The quicksort algorithm avoids the pitfall of simple sorting techniques such as selection sort that need N$^2$ comparisons for an array of length N.
+Now we sort the 100 selected galaxies using our sorting algorithm.
+Our first attempt was to use our quicksort algorithm.
+The quicksort algorithm avoids the pitfall of simple sorting techniques such as selection sort that need N$^2$ comparisons for an array of length N.
 It does this by splitting the array into smaller and smaller subarrays and sorting these recursively.
 We first use selection sort to choose the pivot element from the first, middle and last element.
 Then we start swapping elements to the left of the pivot that are larger than the pivot with elements to the right of the pivot that are smaller than the pivot.
 This ensures that after 1 recursion, we end up with two subarrays that, although they are still unsorted themselves, their elements are in the correct position compared to the pivot element.
 Doing this recursively eventually sorts the entire array with an order O(N log N) comparisons.
+
+Unfortunately, checking the array after the quicksort call revealed there were some values not sorted correctly.
+We therefore resort to our own selection sort as a fallback option for this assignment.
+We have left both algorithms in the code for inspection and will be very happy if any of the graders can spot the mistake in the quicksort algorithm.
 
 \begin{figure}[H]
   \centering

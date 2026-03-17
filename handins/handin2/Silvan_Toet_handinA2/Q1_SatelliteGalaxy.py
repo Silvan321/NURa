@@ -37,7 +37,7 @@ def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float
         Same type and shape as x. Number density of satellite galaxies
         at given radius x.
     """
-    return 0  # insert your function
+    return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
 def general_integrand(x: np.ndarray, a: float, b: float, c: float) -> Callable:
@@ -111,7 +111,7 @@ def main():
     ax.legend()
     plt.savefig("Plots/my_solution_1b.png", dpi=600)
 
-    # Cumulative plot of the chosen galaxies (1c)
+    # # Cumulative plot of the chosen galaxies (1c)
     chosen_indices = choice(np.arange(10000), Nsat)
 
     unique_indices = np.unique(chosen_indices)  # I understood from Marcel that for testing our RNG (in this case for generating every value exactly once), it is okay to use built-in functions
@@ -119,7 +119,6 @@ def main():
     plt.title(f"Histogram of chosen indices for {Nsat} points.\n The number of unique indices is {unique_indices.size}")
     plt.hist(chosen_indices)
     plt.savefig("Plots/choice_test.png", dpi=600)
-
     chosen = xmin + selection_sort(chosen_indices) * (xmax - xmin)  # scale the 100 selected and sorted random numbers in the range (0,10000) to the range (x_min, x_max)
     print(chosen)
     fig1c, ax = plt.subplots()
