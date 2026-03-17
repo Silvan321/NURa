@@ -10,7 +10,7 @@ import numpy as np
 from Q1_satellites_derivative import dn_dx
 from Q1_satellites_integrator import romberg_vector_version
 from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shift
-from Q1_satellites_selection import choice
+from Q1_satellites_selection import choice, quicksort, selection_sort
 
 
 def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
@@ -90,7 +90,7 @@ def main():
 
     edges = 10 ** np.linspace(np.log10(xmin), np.log10(xmax), 21)
 
-    hist = np.histogram(xmin + np.sort(np.random.rand(N_generate)) * (xmax - xmin), bins=edges)[0]  # replace!
+    hist = np.histogram(xmin + np.sort(np.random.rand(N_generate)) * (xmax - xmin), bins=edges)[0]  # SHOULD I ALSO SORT THE 10000 SAMPLES IN 1B?
     hist_scaled = 1e-3 * hist  # replace; this is NOT what you should be plotting, this is just a random example to get a plot with reasonable y values (think about how you *should* scale hist)
 
     fig = plt.figure()
@@ -120,7 +120,7 @@ def main():
     plt.hist(chosen_indices)
     plt.savefig("Plots/choice_test.png", dpi=600)
 
-    chosen = xmin + np.sort(chosen_indices) * (xmax - xmin)  # scale the 100 selected and sorted random numbers in the range (0,10000) to the range (x_min, x_max)
+    chosen = xmin + selection_sort(chosen_indices) * (xmax - xmin)  # scale the 100 selected and sorted random numbers in the range (0,10000) to the range (x_min, x_max)
     print(chosen)
     fig1c, ax = plt.subplots()
     ax.plot(chosen, np.arange(100))
