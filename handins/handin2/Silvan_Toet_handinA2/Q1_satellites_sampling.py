@@ -1,16 +1,6 @@
-# Random Number Generators
-# RNG "States" are based on all info that the RNG has available.
-# The RNG should not reveal its entire info to the user, otherwise the user can predict the next number
-# A and B are sub RNGs
-# A output not based on B output, but uses intermediate output
-# A and B both use their own seed
-
-
-from math import pi
-from collections.abc import Iterable
+#### Sampler block including RNGs ####
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 
 def rng_64bit_xor_shift(x: np.uint64 = np.uint64(123456789), a_iter: Iterable[np.uint64] = (np.uint64(21), np.uint64(35), np.uint64(4)), size: int = 1, scale_uniform: bool = False):
@@ -70,70 +60,42 @@ def additive_combined_rng(
     return P_add
 
 
-def theta_phi_1a(P1, P2):
-    theta = pi * P1
-    phi = 2 * pi * P2
-    return theta, phi
+def sampler(
+    dist: callable,
+    min: float,
+    max: float,
+    Nsamples: int,
+    args: tuple = (),
+) -> np.ndarray:
+    """
+    Sample a distribution using sampling method of your choice
 
+    Parameters
+    dist : callable
+        Distribution to sample
+    min :
+        Minimum value for sampling
+    max : float
+        Maximum value for sampling
+    Nsamples : int
+        Number of samples
+    args : tuple, optional
+        Arguments of the distribution to sample, passed as args to dist
 
-def theta_phi_1b(P1, P2):
-    theta = np.arccos(1 - 2 * P1)
-    phi = 2 * pi * P2
-    return theta, phi
+    Returns
+    -------
+    sample: ndarray
+        Values sampled from dist, shape (Nsamples,)
+    """
 
+    # Scale p(x) top to 1. So basically divide n_x (or p_x??) by its maximum value
+    # Generate a random number from the distribution that we want a value from, so n(x) in our case
+    # Then generate a separate random number from a uniform distribution [0,1), which we interpret as the probability
+    # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
+    # First
 
-def main():
-    num_points = 1000
-    rng_size = 10000
-    # We need TWO DIFFERENT random number generators, otherwise every theta, phi pair uses the same random number
-    # Then we get a helix with the shape theta = 2 phi
-    P_64 = rng_64bit_xor_shift(size=rng_size, scale_uniform=True)
-    print(P_64)
+    P_uniform = additive_combined_rng(size=10000)
+    P_ab = a + (b - a) * P_uniform
+    n_x_scaled = n_x / n_x_max
 
-    P_lcg = lcg(size=rng_size, scale_uniform=True)
-    print(P_lcg)
-
-    P_add = additive_combined_rng(size=rng_size, scale_uniform=True)
-    print(P_add)
-
-    rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
-
-    fig, axs = plt.subplots(3, 1)
-    for i, key in enumerate(rngs_dict):
-        axs[i].set_title(key)
-        axs[i].hist(rngs_dict[key])
-
-    x = np.arange(rng_size)
-    fig, axs = plt.subplots(3, 1)
-    for i, key in enumerate(rngs_dict):
-        freqs = np.fft.fft(rngs_dict[key])
-        axs[i].set_title(key)
-        axs[i].scatter(x, freqs)
-
-    P_u1 = np.random.uniform(0, 1, size=num_points)
-    P_u2 = np.random.uniform(0, 1, size=num_points)
-    r = np.ones(num_points)
-
-    theta_1a, phi_1a = theta_phi_1a(P_u1, P_u2)
-    x_1a = r * np.sin(theta_1a) * np.cos(phi_1a)
-    y_1a = r * np.sin(theta_1a) * np.sin(phi_1a)
-    z_1a = r * np.cos(theta_1a)
-
-    ax = plt.figure().add_subplot(projection="3d")
-    ax.scatter(x_1a, y_1a, z_1a)
-
-    theta_1b, phi_1b = theta_phi_1b(P_u1, P_u2)
-    x_1b = r * np.sin(theta_1b) * np.cos(phi_1b)
-    y_1b = r * np.sin(theta_1b) * np.sin(phi_1b)
-    z_1b = r * np.cos(theta_1b)
-
-    ax = plt.figure().add_subplot(projection="3d")
-    ax.scatter(x_1b, y_1b, z_1b)
-
-    plt.show()
-    # As we can see, the second option corrects for the fact that a surface element on a unit sphere is compressed near the poles
-    # In the case of the theta phi generation in 1a, we get more values near the poles
-    # Think of a globe: Meridian lines converge as you get closer to the poles
-
-
-main()
+    return np.zeros(Nsamples)

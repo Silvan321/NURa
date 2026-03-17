@@ -85,6 +85,7 @@ ignore = [
 
     # method signature
     "PLR0911",
+    "PLR0913",
 
     # setup.py
     "DTZ005",
