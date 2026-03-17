@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Q1_satellites_derivative import dn_dx
 from Q1_satellites_integrator import romberg_vector_version
+from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shift
 
 
 def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
@@ -61,6 +62,20 @@ def main():
     A = 1 / (4 * pi * integral)  # to be computed
     with open("Calculations/satellite_A.txt", "w") as f:
         f.write(f"{A:.12g}\n")
+
+    rng_test_size = 100000
+    P_64 = rng_64bit_xor_shift(size=rng_test_size, scale_uniform=True)
+    P_lcg = lcg(size=rng_test_size, scale_uniform=True)
+    P_add = additive_combined_rng(size=rng_test_size, scale_uniform=True)
+    rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
+
+    fig, axs = plt.subplots(3, 1, figsize=(16, 10))
+    fig.suptitle(f"Division of generated random numbers of the two sub generators and the combined generator,\nfor {rng_test_size} random numbers, scaled uniformly over 10 bins")
+    for i, key in enumerate(rngs_dict):
+        axs[i].set_title(key)
+        axs[i].hist(rngs_dict[key])
+    plt.savefig("Plots/rng_test.png", dpi=600)
+
     integrand = lambda x, a, b, c: 0.0  # replace by the correct function
     integrated_Nsat = 0.0  # replace by the correct integral, e.g. by calling your integrator
 

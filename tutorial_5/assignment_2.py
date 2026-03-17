@@ -84,7 +84,7 @@ def theta_phi_1b(P1, P2):
 
 def main():
     num_points = 1000
-    rng_size = 10000
+    rng_size = 100000
     # We need TWO DIFFERENT random number generators, otherwise every theta, phi pair uses the same random number
     # Then we get a helix with the shape theta = 2 phi
     P_64 = rng_64bit_xor_shift(size=rng_size, scale_uniform=True)
@@ -99,6 +99,7 @@ def main():
     rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
 
     fig, axs = plt.subplots(3, 1)
+    fig.suptitle(f"Division of generated random numbers of the two sub generators and the combined generator,\nfor {rng_size} random numbers, scaled uniformly over 10 bins")
     for i, key in enumerate(rngs_dict):
         axs[i].set_title(key)
         axs[i].hist(rngs_dict[key])

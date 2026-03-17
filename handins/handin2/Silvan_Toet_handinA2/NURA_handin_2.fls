@@ -206,6 +206,14 @@ INPUT .\Code\satellites_integrator_code.txt
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt8.tfm
 INPUT Code\satellites_integrator_code.txt
+INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tcrm1000.tfm
+INPUT .\Plots\rng_test.png
+INPUT .\Plots\rng_test.png
+INPUT .\Plots\rng_test.png
+INPUT .\Plots\rng_test.png
+INPUT .\Plots\rng_test.png
+INPUT .\Plots\rng_test.png
+INPUT .\Plots\rng_test.png
 INPUT .\Plots\my_solution_1b.png
 INPUT .\Plots\my_solution_1b.png
 INPUT .\Plots\my_solution_1b.png
@@ -253,6 +261,8 @@ INPUT Code\heatingcooling_code.txt
 INPUT NURA_handin_2.aux
 INPUT .\NURA_handin_2.out
 INPUT .\NURA_handin_2.out
+INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx12.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx12.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmex10.pfb
