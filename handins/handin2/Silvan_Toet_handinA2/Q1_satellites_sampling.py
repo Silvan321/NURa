@@ -68,13 +68,8 @@ def additive_combined_rng(
     return P_add
 
 
-def sampler(
-    dist: Callable,
-    a: float,
-    b: float,
-    Nsamples: int,
-) -> np.ndarray:
-    """Sample a distribution using sampling method of your choice
+def sampler(dist: Callable, a: float, b: float, Nsamples: int) -> np.ndarray:
+    """Sample from a normalized distribution using rejection sampling.
 
     Parameters
     ----------
@@ -86,17 +81,12 @@ def sampler(
         Maximum value for sampling
     Nsamples : int
         Number of samples
-    args : tuple, optional
-        Arguments of the distribution to sample, passed as args to dist
 
     Returns
     -------
     sample: ndarray
         Values sampled from dist, shape (Nsamples,)
     """
-    dist_max = np.max(dist)  # Scale p(x) top to 1.
-    dist_scaled = dist / dist_max
-
     samples = np.zeros(Nsamples)
     number_of_acquired_samples = 0
     while number_of_acquired_samples < Nsamples:  # Since we might reject a lot of samples, keep generating samples in batches of Nsamples until we have enough
@@ -106,10 +96,10 @@ def sampler(
         for x, y in zip(  # noqa: B905
             P_ab, P2_uniform
         ):  # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
-            if y < dist_scaled(x):
+            if y < dist(x):
                 samples[number_of_acquired_samples] = x
                 number_of_acquired_samples += 1
             if number_of_acquired_samples >= Nsamples:
                 break
 
-    return np.zeros(Nsamples)
+    return samples

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Q1_satellites_derivative import dn_dx
 from Q1_satellites_integrator import romberg_vector_version
-from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shift
+from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shift, sampler
 from Q1_satellites_selection import choice, quicksort, selection_sort
 
 
@@ -61,41 +61,41 @@ def main():
 
     # Normalisation
     A = 1 / (4 * pi * integral)  # to be computed
-    with open("Calculations/satellite_A.txt", "w") as f:
-        f.write(f"{A:.12g}\n")
+    # with open("Calculations/satellite_A.txt", "w") as f:
+    #     f.write(f"{A:.12g}\n")
 
-    rng_test_size = 100000
-    P_64 = rng_64bit_xor_shift(size=rng_test_size, scale_uniform=True)
-    P_lcg = lcg(size=rng_test_size, scale_uniform=True)
-    P_add = additive_combined_rng(size=rng_test_size, scale_uniform=True)
-    rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
+    # rng_test_size = 100000
+    # P_64 = rng_64bit_xor_shift(size=rng_test_size, scale_uniform=True)
+    # P_lcg = lcg(size=rng_test_size, scale_uniform=True)
+    # P_add = additive_combined_rng(size=rng_test_size, scale_uniform=True)
+    # rngs_dict = {"64bit_XOR": P_64, "LCG": P_lcg, "Additive Combination": P_add}
 
-    fig, axs = plt.subplots(3, 1, figsize=(16, 10))
-    fig.suptitle(f"Division of generated random numbers of the two sub generators and the combined generator,\nfor {rng_test_size} random numbers, scaled uniformly over 10 bins")
-    for i, key in enumerate(rngs_dict):
-        axs[i].set_title(key)
-        axs[i].hist(rngs_dict[key])
-    plt.savefig("Plots/rng_test.png", dpi=600)
-
-    integrand = lambda x, a, b, c: 0.0  # replace by the correct function
-    integrated_Nsat = 0.0  # replace by the correct integral, e.g. by calling your integrator
-
-    p_of_x = lambda x: 0.0  # replace by the normalised distribution of satellite galaxies as a function of x
+    # fig, axs = plt.subplots(3, 1, figsize=(16, 10))
+    # fig.suptitle(f"Division of generated random numbers of the two sub generators and the combined generator,\nfor {rng_test_size} random numbers, scaled uniformly over 10 bins")
+    # for i, key in enumerate(rngs_dict):
+    #     axs[i].set_title(key)
+    #     axs[i].hist(rngs_dict[key])
+    # plt.savefig("Plots/rng_test.png", dpi=600)
 
     # Numerically determine maximum to normalize p(x) for sampling
-    pmax = 0.0  # replace by taking the maximum value of p_of_x
+    # Since this assigment doesn't cover material from lecture 7 maximization I don't use the methods described there
+    pmax = max(np.linspace(xmin, xmax, N_generate), key=lambda x: n(x, A, Nsat, a, b, c))
 
-    p_of_x_norm = lambda x: 0.0  # replace by the normalised distribution
-    random_samples = np.zeros(N_generate)  # replace by your sampler(p_of_x_norm, min=xmin, max=xmax, Nsamples=N_generate, args=())
+    p_of_x_norm = lambda x: n(x, A, Nsat, a, b, c) / pmax
+    random_samples = sampler(p_of_x_norm, xmin, xmax, N_generate)
 
     edges = 10 ** np.linspace(np.log10(xmin), np.log10(xmax), 21)
 
-    hist = np.histogram(xmin + np.sort(np.random.rand(N_generate)) * (xmax - xmin), bins=edges)[0]  # SHOULD I ALSO SORT THE 10000 SAMPLES IN 1B?
+    hist = np.histogram(xmin + np.sort(random_samples) * (xmax - xmin), bins=edges)[0]  # SHOULD I ALSO SORT THE 10000 SAMPLES IN 1B?
     hist_scaled = 1e-3 * hist  # replace; this is NOT what you should be plotting, this is just a random example to get a plot with reasonable y values (think about how you *should* scale hist)
 
-    fig = plt.figure()
     relative_radius = edges.copy()  # replace!
-    analytical_function = edges.copy()  # replace
+    analytical_function = n(relative_radius, A, Nsat, a, b, c)  # replace
+
+    plt.figure()
+    plt.plot(relative_radius, n(relative_radius, A, Nsat, a, b, c))
+    plt.loglog()
+    plt.show()
 
     fig1b, ax = plt.subplots()
     ax.stairs(hist_scaled, edges=edges, fill=True, label="Satellite galaxies")  # just an example line, correct this!
