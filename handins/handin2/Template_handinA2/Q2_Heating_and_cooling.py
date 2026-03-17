@@ -3,7 +3,7 @@ import numpy as np
 # Constants (mind the units!)
 
 psi = 0.929
-Tc = 1e4 # K
+Tc = 1e4  # K
 Z = 0.015
 k = 1.38e-16  # erg/K
 aB = 2e-13  # cm^3 / s
@@ -13,22 +13,14 @@ xi = 1e-15
 
 # There's no need for nH nor ne as they cancel out
 def equilibrium1(T, Z, Tc, psi):
-    return psi * Tc * k - (0.684 - 0.0416 * np.log(T / (1e4 * Z * Z))) * T * k
+    return psi * Tc * k - (0.684 - 0.0416 * np.log(T / (1e4 * Z * Z))) * T * k  # Note: this is already Gamma_pe - Lambda_rr for the first question, with n_h and n_e cancelled out.
+
+
+# Therefore we can equate this to 0 and simply find the zero-crossing aka root.
 
 
 def equilibrium2(T, Z, Tc, psi, nH, A, xi, aB):
-    return (
-        (
-            psi * Tc
-            - (0.684 - 0.0416 * np.log(T / (1e4 * Z * Z))) * T
-            - 0.54 * (T / 1e4) ** 0.37 * T
-        )
-        * k
-        * nH
-        * aB
-        + A * xi
-        + 8.9e-26 * (T / 1e4)
-    )
+    return (psi * Tc - (0.684 - 0.0416 * np.log(T / (1e4 * Z * Z))) * T - 0.54 * (T / 1e4) ** 0.37 * T) * k * nH * aB + A * xi + 8.9e-26 * (T / 1e4)  # and here the same applies
 
 
 # Derivative function, might be useful if using Newton-Raphson method for root finding
@@ -94,7 +86,6 @@ def main():
     bracket = (1, 1e15)
 
     for nH in [1e-4, 1, 1e4]:
-
         root, aerr, rerr = 0.0, 0.0, 0.0  # replace with your root finder
         if nH == 1e-4:
             with open("Calculations/equilibrium_low_density.txt", "w") as f:

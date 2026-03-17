@@ -124,7 +124,10 @@ We could not get BigCrush our DieHard to work to thoroughly test our RNG, but we
 \end{figure}
 
 we calculate the maximum value of n(x) and create a new function scaled to this maximum value. The new function serves as our probability distribution p(x)
-Next we plot our 10000 generated values from this probability distribution. As we can see, the histograms follow the analytical function around the exponential cutoff region.
+Next we plot our 10000 generated values from this probability distribution. We scale the bins with the density parameter in the histogram function to account for their varying widths on a log scale.
+Because this density parameter scales the integral/sum of the histograms to 1, we multiply with 100 to get the same average total number of satellites as the normalized analytical function.
+
+As we can see, the histograms follow the analytical function around the exponential cutoff region.
 However, the sampler seems to undersample values at small radii.
 
 \subsection{Code for sampling}
