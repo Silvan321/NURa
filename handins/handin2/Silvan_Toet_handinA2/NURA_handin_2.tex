@@ -114,6 +114,19 @@ Does your sampled distribution agree with the analytical prediction?
 Describe the selection of 100 galaxies (equal probability, no duplicates, no rejection).
 Explain the sorting algorithm you used.
 
+We are asked to select 100 galaxies with equal probability, without duplicates and without rejection of a generated sample.
+As explained during the lecture, a Linear Congruential Generator is not a great RNG on its own, partially due to the fact it cannot generate duplicate samples before it starts to repeat itself.
+Once it starts to repeat itself, the entire sequence repeats (becomes periodic).
+But this means that if we choose our LCG parameters (a,c and m) right, we can ensure that we get 100 random numbers with equal probability without a duplicate!
+A quick search on LCGs on wikipedia (\url{https://en.wikipedia.org/wiki/Linear_congruential_generator}) reveals that if we satisfy the Hull-Dobell theorem, we are guaranteed to get a full sequence of period m for every seed value x.
+The three criteria to be met are:
+\begin{enumerate}
+  \item m and c are comprime
+  \item a - 1 is divisible by all prime factors of m
+  \item a - 1 is divisible by 4 if m is divisible by 4
+\end{enumerate}
+We want m$>$100, so choose m = 128 = $2^7$, c = 1 and a = 5.
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{\PlotDir/my_solution_1c.png}

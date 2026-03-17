@@ -57,12 +57,10 @@ echo "Running Python script to solve the satellite galaxy number density in 1a..
 python3 Q1_SatelliteGalaxy.py
 
 # Copy the code to a text file which will be shown in the PDF
-# ADAPT THIS, or in the tex load in only certain lines from these files relevant to the (sub)question!
-cat Q1_SatelliteGalaxy.py > Code/Poisson_code.txt
-cat Q1_SatelliteGalaxy.py > Code/satellites_integrator_code.txt
-cat Q1_SatelliteGalaxy.py > Code/satellites_sampling_code.txt
-cat Q1_SatelliteGalaxy.py > Code/satellites_selection_code.txt
-cat Q1_SatelliteGalaxy.py > Code/satellites_derivative_code.txt
+cat Q1_satellites_integrator.py > Code/satellites_integrator_code.txt
+cat Q1_satellites_sampling.py > Code/satellites_sampling_code.txt
+cat Q1_satellites_selection.py > Code/satellites_selection_code.txt
+cat Q1_satellites_derivative.py > Code/satellites_derivative_code.txt
 
 echo "Running the Python script to solve the heating and cooling question 2..."
 python3 Q2_Heating_and_cooling.py
