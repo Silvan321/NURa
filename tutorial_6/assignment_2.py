@@ -18,7 +18,7 @@ def bisection(func: Callable, a: float, b: float, abs_err: float, rel_err: float
     fc = -1
     iteration = 0
     while not np.isclose(fc, 0.0, rtol=rel_err, atol=abs_err) and iteration < max_number_of_iterations:
-        c = (a + b) / 2
+        c = (a + b) * 0.5
         fc = func(c)  # middle function evaluation
         if fc * fa < 0:  # root is in between low and middle value
             fb = fc  # update function evaluation of high value to middle value
@@ -91,7 +91,7 @@ def newton_raphson_only(func: Callable, func_deriv: Callable, a: float, b: float
         )
 
     iteration = 0
-    c = (b - a) * 0.5  # initial guess
+    c = (a + b) * 0.5  # initial guess
     fd = -1
     while not np.isclose(fd, 0.0, rtol=rel_err, atol=abs_err) and iteration < max_number_of_iterations:
         d = c - func(c) / func_deriv(c)
@@ -103,8 +103,38 @@ def newton_raphson_only(func: Callable, func_deriv: Callable, a: float, b: float
     return d, iteration
 
 
+def newton_raphson_with_bisection(func: Callable, func_deriv: Callable, a: float, b: float, abs_err: float, rel_err: float, max_number_of_iterations: int = 50):
+    """Implement the Newton Raphson algorithm combined with bisection for finding a single root for a 1D function.
+    If Newton-Raphson is about to jump outside the supplied bracket, we simply do a bisection step.
+    Contrary to the other root finding functions, this function also requires an analytical derivative of the function.
+    Calculating a numerical derivative is not worth it for efficiency: those calculations could be spend more efficiently on more iterations.
+    a and b are the boundaries of the interval in which the root should lie.
+    """
+    fa, fb = func(a), func(b)
+    if not fa * fb < 0:  # if the root is inside the bracket, one function evaluation is positive and the other is negative, so the product must be negative!
+        raise ValueError(
+            "Product of function evaluations not negative. If the root is inside the bracket, one function evaluation is positive and the other is negative, so the product must be negative!"
+        )
+
+    iteration = 0
+    c = (a + b) * 0.5  # initial guess
+    fd = -1
+    while not np.isclose(fd, 0.0, rtol=rel_err, atol=abs_err) and iteration < max_number_of_iterations:
+        d = c - func(c) / func_deriv(c)
+        if ((a - d) * (d - b)) < 0:  # a should be smaller than d and d should be smaller than b while inside bracket, so both negative, so product positive
+            d = (b + c) / 2  # overwrite d with bisection step in this case
+        fd = func(d)
+        c, b = d, c
+        iteration += 1
+    return d, iteration
+
+
 def func2a(x):
     return x**3 - 6 * x**2 + 11 * x - 6
+
+
+def func2aderiv(x):
+    return 3 * x**2 - 12 * x + 11
 
 
 def func2b(x):
@@ -124,6 +154,7 @@ def main():
     # Know thy function!
     func_list = [func2a, func2b, func2c, func2d]
     algorithm_list = [bisection, secant, false_position]
+    deriv_algorithm_list = [newton_raphson_only, newton_raphson_with_bisection]
     total_x = np.linspace(-2, 4, num=1000)
 
     fig, axs = plt.subplots(2, 2)
@@ -139,6 +170,10 @@ def main():
     for algorithm in algorithm_list:
         root, number_of_iterations = algorithm(func2a, x[0], x[-1], abs_err=1e-6, rel_err=1e-6)
         print(f"{algorithm=}, {root=}, {number_of_iterations=}")
+
+    for deriv_algorithm in deriv_algorithm_list:
+        root, number_of_iterations = deriv_algorithm(func2a, func2aderiv, x[0], x[-1], abs_err=1e-6, rel_err=1e-6)
+        print(f"{deriv_algorithm=}, {root=}, {number_of_iterations=}")
 
     print()
     # Assignment 2b
