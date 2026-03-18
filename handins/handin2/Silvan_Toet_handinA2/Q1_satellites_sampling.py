@@ -90,10 +90,13 @@ def sampler(dist: Callable, a: float, b: float, Nsamples: int) -> np.ndarray:
     samples = np.zeros(Nsamples)
     number_of_acquired_samples = 0
     total_generated_samples = 0
+    x1, x2, x3, x4 = 123456789, 987654321, 555555, 777777
     while number_of_acquired_samples < Nsamples:  # Since we might reject a lot of samples, keep generating samples in batches of Nsamples until we have enough
-        P1_uniform = additive_combined_rng(size=Nsamples)  # Generate random numbers for the abscissa range of the distribution that we to sample from
+        P1_uniform = additive_combined_rng(np.uint64(x1), np.uint64(x2), size=Nsamples)  # Generate random numbers for the abscissa range of the distribution that we to sample from
         P_ab = a + (b - a) * P1_uniform  # Scale these to the abscissa range
-        P2_uniform = additive_combined_rng(size=Nsamples)  # Then generate a separate random number from a uniform distribution [0,1), which we interpret as the probability
+        P2_uniform = additive_combined_rng(
+            np.uint64(x3), np.uint64(x4), size=Nsamples
+        )  # Then generate a separate random number from a uniform distribution [0,1), which we interpret as the probability
         for x, y in zip(  # noqa: B905
             P_ab, P2_uniform
         ):  # Then we accept x into our sample if y < p(x): the higher p(x) is for that value of x, the more likely x should be, and therefore the more likely that y is smaller than p(x)
@@ -103,5 +106,6 @@ def sampler(dist: Callable, a: float, b: float, Nsamples: int) -> np.ndarray:
                 number_of_acquired_samples += 1
             if number_of_acquired_samples >= Nsamples:
                 break
+        x1, x2, x3, x4 = P1_uniform[-2], P1_uniform[-1], P2_uniform[-2], P2_uniform[-1]  # Set seeds for next batch generation to last generated values, otherwise they will start with the same seed!
 
     return samples
