@@ -1,1 +1,3 @@
-0
+algorithm=<function bisection at 0x000002967D49EF80>, 29802323.3877
+algorithm=<function secant at 0x000002967D49F0A0>, 5.375
+algorithm=<function false_position at 0x000002967D49F1C0>, 5.375

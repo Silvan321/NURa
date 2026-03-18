@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import numpy as np
 
 # Constants (mind the units!)
@@ -75,6 +76,13 @@ def main():
 
     # Initial bracket
     bracket = (1, 1e7)
+
+    x_range = np.linspace(bracket[0], bracket[1])
+
+    plt.figure()
+    plt.plot(x_range, equilibrium1(x_range, Z, Tc, psi))
+    plt.semilogx()
+    plt.savefig("Plots/equilibrium1.png", dpi=600)
 
     root, aerr, rerr = 0.0, 0.0, 0.0  # replace with your root finder
 

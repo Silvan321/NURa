@@ -129,6 +129,40 @@ def newton_raphson_with_bisection(func: Callable, func_deriv: Callable, a: float
     return d, iteration
 
 
+def newton_raphson_with_false_position(func: Callable, func_deriv: Callable, a: float, b: float, abs_err: float, rel_err: float, max_number_of_iterations: int = 50):
+    """Implement the Newton Raphson algorithm combined with false position for finding a single root for a 1D function.
+    If Newton-Raphson is about to jump outside the supplied bracket, we simply do a false position step.
+    Contrary to the other root finding functions, this function also requires an analytical derivative of the function.
+    Calculating a numerical derivative is not worth it for efficiency: those calculations could be spend more efficiently on more iterations.
+    a and b are the boundaries of the interval in which the root should lie.
+    """
+    fa, fb = func(a), func(b)
+    if not fa * fb < 0:  # if the root is inside the bracket, one function evaluation is positive and the other is negative, so the product must be negative!
+        raise ValueError(
+            "Product of function evaluations not negative. If the root is inside the bracket, one function evaluation is positive and the other is negative, so the product must be negative!"
+        )
+
+    iteration = 0
+    c = (a + b) * 0.5  # initial guess
+    fd = -1
+    while not np.isclose(fd, 0.0, rtol=rel_err, atol=abs_err) and iteration < max_number_of_iterations:
+        fc = func(c)
+        d = c - fc / func_deriv(c)
+        if ((a - d) * (d - b)) < 0:  # a should be smaller than d and d should be smaller than b while inside bracket, so both negative, so product positive
+            d = c - ((c - b) / (fc - fb)) * fc
+            fd = func(d)  # middle function evaluation
+            if fb * fd < 0:  # root between b and d
+                c = d
+                fc = func(c)
+            else:  # root between c and d
+                c, b = d, c
+                fb, fc = func(b), func(d)
+        fd = func(d)
+        c, b = d, c
+        iteration += 1
+    return d, iteration
+
+
 def func2a(x):
     return x**3 - 6 * x**2 + 11 * x - 6
 
@@ -154,7 +188,7 @@ def main():
     # Know thy function!
     func_list = [func2a, func2b, func2c, func2d]
     algorithm_list = [bisection, secant, false_position]
-    deriv_algorithm_list = [newton_raphson_only, newton_raphson_with_bisection]
+    deriv_algorithm_list = [newton_raphson_only, newton_raphson_with_bisection, newton_raphson_with_false_position]
     total_x = np.linspace(-2, 4, num=1000)
 
     fig, axs = plt.subplots(2, 2)
