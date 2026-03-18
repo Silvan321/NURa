@@ -1,3 +1,3 @@
-algorithm=<function bisection at 0x000002967D49EF80>, 1.60648345947e+14
-algorithm=<function secant at 0x000002967D49F0A0>, 58085.875
-algorithm=<function false_position at 0x000002967D49F1C0>, 58085.875
+root 1.60648345947e+14, n_iter 18
+root 58085.875, n_iter 1
+root 58085.875, n_iter 1

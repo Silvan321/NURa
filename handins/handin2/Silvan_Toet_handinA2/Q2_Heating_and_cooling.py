@@ -114,7 +114,7 @@ def main():
     # Initial bracket
     bracket = (1, 1e7)
 
-    x1_range = np.linspace(bracket[0], bracket[1])
+    x1_range = 10 ** np.linspace(np.log10(bracket[0]), np.log10(bracket[1]), num=1000)
 
     plt.figure(figsize=(16, 10))
     plt.title("Temperature distribution with only photoionization vs radiative recombination\n Equilibrium where y=0")
@@ -128,19 +128,20 @@ def main():
     plt.ylim(-1e-12, 1e-12)
     plt.semilogx()
     plt.savefig("Plots/equilibrium1_zoomed.png", dpi=600)
+    plt.show()
 
     algorithm_list = [bisection, secant, false_position]
 
     with open("Calculations/equilibrium_temp_simple.txt", "w") as f:
         for algorithm in algorithm_list:
-            root, number_of_iterations = algorithm(equilibrium1_partial, x1_range[0], x1_range[-1], abs_err=1e-20, rel_err=1e-12)
-            f.write(f"{algorithm=}, {root:.12g}\n")
+            root, number_of_iterations = algorithm(equilibrium1_partial, x1_range[0], x1_range[-1], abs_err=1e-14, rel_err=1e-12)
+            f.write(f"root {root:.12g}, n_iter {number_of_iterations}\n")
 
     ### 2b ####
 
     # Initial bracket
     bracket = (1, 1e15)
-    x2_range = np.linspace(bracket[0], bracket[1])
+    x2_range = 10 ** np.linspace(np.log10(bracket[0]), np.log10(bracket[1]), num=1000)
 
     ne_list = [1e-4, 1, 1e4]
 
@@ -156,7 +157,7 @@ def main():
     for i, ne in enumerate(ne_list):
         axs[i].plot(x2_range, equilibrium2_partial(T=x2_range, nH=ne))
         axs[i].set_xscale("log")
-        axs[i].set_ylim(-1e-13, 1e-13)
+        axs[i].set_ylim(-1e-20, 1e-20)
     plt.savefig("Plots/equilibrium2_zoomed.png", dpi=600)
 
     # We again assume the gas is fully ionized, so for nH we use the given values for ne
@@ -164,25 +165,25 @@ def main():
         print()
         for algorithm in algorithm_list:
             equilibrium2_with_nh = partial(equilibrium2_partial, nH=nH)
-            root, number_of_iterations = algorithm(equilibrium2_with_nh, x2_range[0], x2_range[-1], abs_err=1e-20, rel_err=1e-12)
+            root, number_of_iterations = algorithm(equilibrium2_with_nh, x2_range[0], x2_range[-1], abs_err=1e-14, rel_err=1e-12)
         if nH == 1e-4:
             with open("Calculations/equilibrium_low_density.txt", "w") as f:
                 for algorithm in algorithm_list:
                     equilibrium2_with_nh = partial(equilibrium2_partial, nH=nH)
                     root, number_of_iterations = algorithm(equilibrium2_with_nh, x2_range[0], x2_range[-1], abs_err=1e-20, rel_err=1e-12)
-                    f.write(f"{algorithm=}, {root:.12g}\n")
+                    f.write(f"root {root:.12g}, n_iter {number_of_iterations}\n")
         elif nH == 1:
             with open("Calculations/equilibrium_mid_density.txt", "w") as f:
                 for algorithm in algorithm_list:
                     equilibrium2_with_nh = partial(equilibrium2_partial, nH=nH)
                     root, number_of_iterations = algorithm(equilibrium2_with_nh, x2_range[0], x2_range[-1], abs_err=1e-20, rel_err=1e-12)
-                    f.write(f"{algorithm=}, {root:.12g}\n")
+                    f.write(f"root {root:.12g}, n_iter {number_of_iterations}\n")
         elif nH == 1e4:
             with open("Calculations/equilibrium_high_density.txt", "w") as f:
                 for algorithm in algorithm_list:
                     equilibrium2_with_nh = partial(equilibrium2_partial, nH=nH)
                     root, number_of_iterations = algorithm(equilibrium2_with_nh, x2_range[0], x2_range[-1], abs_err=1e-20, rel_err=1e-12)
-                    f.write(f"{algorithm=}, {root:.12g}\n")
+                    f.write(f"root {root:.12g}, n_iter {number_of_iterations}\n")
 
 
 if __name__ == "__main__":

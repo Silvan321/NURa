@@ -224,41 +224,121 @@ We would appreciate feedback on this as well.
 
 \subsection{(2a) Photoionization heating and radiative recombination cooling}
 
-Describe the implementation of your root-finding method (e.g. bisection, Newton-Raphson).
+root finding deals with finding the point x on the abscissa where a function f(x) crosses it e.g. f(x) = 0.
+This can also be used to find intersections (in this case the equilibrium temperature) of two functions, simply by defining the difference function h(x) = g(x) - f(x).
+We decided to compare three different root finding methods: bisection, secant and false position.
+In all three methods we start with a function and a bracket [a,b] in which a single root must lie.
+
+This can be determined by checking if f(a) * f(b) < 0: one function value must be positive and one negative and therefore their product negative.
+Bisection takes a new point c halfway between a and b and evaluates the function there. If the root is between a and c, this becomes the new interval. Same for b and c.
+a,b and c are updated in subsequent steps.
+
+Secant determines a new point c by drawing a line from a to b and looking where it hits the x axis.
+again, a,b and c are updated in subsequent steps.
+However, this method is prone to divergence: the new point c could land outside the original bracket.
+
+False position does essentially the same as secant, but also keeps the counterpoint (the previous best estimate).
+It then checks if the new point would fall outside the bracket, and if so, use the counterpoint.
+
+Secant and false position can in theory converge faster than bisection, but can get stuck on function that suddenly start to grow/shrink rapidly.
+It is always a good idea to first examine our function.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{\PlotDir/equilibrium1.png}
+  \caption{Equilibrium temperature function 1.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{\PlotDir/equilibrium1_zoomed.png}
+  \caption{Equilibrium temperature function 1, zoomed in on the root.}
+\end{figure}
+
 
 \begin{table}[H]
   \centering
-  \caption{Equilibrium temperature for the simplified heating–cooling model.}
-  \begin{tabular}{|c|c|c|}
+  \caption{Equilibrium temperature for the simplified heating–cooling model for different root finding methods.}
+  \begin{tabular}{|c|}
     \hline
-    Temperature [K] & Absolute error & Relative error \\
+    Temperature [K] and Number of iterations                                                 \\
     \hline
-    \input{\CalcDir/equilibrium_temp_simple.txt}
+    bisection \lstinputlisting[firstline=1,lastline=1]{\CalcDir/equilibrium_temp_simple.txt} \\
+    secant \lstinputlisting[firstline=2,lastline=2]{\CalcDir/equilibrium_temp_simple.txt}    \\
+    false position \lstinputlisting[firstline=3,lastline=3]{\CalcDir/equilibrium_temp_simple.txt}
     \\
     \hline
   \end{tabular}
 \end{table}
 
-How many iterations it took? Discuss the convergence of your root finder.
+The function is indeed one likely for secant and false position to get stuck on.
+As we can see from the table and figures, bisection and false position do quite well.
+False position converges faster.
+Secant diverges and therefore returns nan.
 
 \subsection{(2b) More realistic model}
+
+We again first examine our function, for different values of $n_H$.
+We then apply bisection, secant and false position again.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{\PlotDir/equilibrium2.png}
+  \caption{Equilibrium temperature function 2.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{\PlotDir/equilibrium2_zoomed.png}
+  \caption{Equilibrium temperature function 2, zoomed in on the roots.}
+\end{figure}
+
 
 
 \begin{table}[H]
   \centering
-  \caption{Equilibrium temperature for different gas densities.}
+  \caption{Equilibrium temperature for different gas densities for bisection method.}
   \begin{tabular}{|c|c|}
     \hline
-    Density \(n_H\) [cm\(^{-3}\)] & Equilibrium temperature [K]                   \\
+    Density \(n_H\) [cm\(^{-3}\)] & Equilibrium temperature [K] and number of iterations                            \\
     \hline
-    $10^{-4}$                     & \input{\CalcDir/equilibrium_low_density.txt}  \\
-    $1$                           & \input{\CalcDir/equilibrium_mid_density.txt}  \\
-    $10^4$                        & \input{\CalcDir/equilibrium_high_density.txt} \\
+    $10^{-4}$                     & \lstinputlisting[firstline=1,lastline=1]{\CalcDir/equilibrium_low_density.txt}  \\
+    $1$                           & \lstinputlisting[firstline=1,lastline=1]{\CalcDir/equilibrium_mid_density.txt}  \\
+    $10^4$                        & \lstinputlisting[firstline=1,lastline=1]{\CalcDir/equilibrium_high_density.txt} \\
     \hline
   \end{tabular}
 \end{table}
 
-Discuss the results.  What is the difference for the low, intermediate and high gas density?
+\begin{table}[H]
+  \centering
+  \caption{Equilibrium temperature for different gas densities for secant method.}
+  \begin{tabular}{|c|c|}
+    \hline
+    Density \(n_H\) [cm\(^{-3}\)] & Equilibrium temperature [K] and number of iterations                            \\
+    \hline
+    $10^{-4}$                     & \lstinputlisting[firstline=2,lastline=2]{\CalcDir/equilibrium_low_density.txt}  \\
+    $1$                           & \lstinputlisting[firstline=2,lastline=2]{\CalcDir/equilibrium_mid_density.txt}  \\
+    $10^4$                        & \lstinputlisting[firstline=2,lastline=2]{\CalcDir/equilibrium_high_density.txt} \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Equilibrium temperature for different gas densities for false position method.}
+  \begin{tabular}{|c|c|}
+    \hline
+    Density \(n_H\) [cm\(^{-3}\)] & Equilibrium temperature [K] and number of iterations                            \\
+    \hline
+    $10^{-4}$                     & \lstinputlisting[firstline=3,lastline=3]{\CalcDir/equilibrium_low_density.txt}  \\
+    $1$                           & \lstinputlisting[firstline=3,lastline=3]{\CalcDir/equilibrium_mid_density.txt}  \\
+    $10^4$                        & \lstinputlisting[firstline=3,lastline=3]{\CalcDir/equilibrium_high_density.txt} \\
+    \hline
+  \end{tabular}
+\end{table}
+
+As we can see from the figures and tables, bisection performes the best by far: it finds the root in all three cases.
+Secant and false position fail miserably, being off by many orders of magnitude.
 
 
 \subsection{Code for Exercise 2}
@@ -266,5 +346,15 @@ Discuss the results.  What is the difference for the low, intermediate and high 
 \lstinputlisting[language=Python]{\CodeDir/heatingcooling_code.txt}
 
 \section{Conclusions}
+This is short summary as I have moved the main discussion of the results to each subquestion.
+In the first exercise we first integrated a satellite galaxy distribution using Romberg integration.
+We then generated 10000 satellites from the probability distribution using rejection sampling and our own combined RNG, made up of an 64 bit XOR shift and Linear Congruential Generator.
+We compared the generated values to the analytical distribution.
+Next we randomly selected 100 galaxies without duplicates or rejection using an LCG with a full period using the Hull-Dobell theorem.
+Then we sorted these: first we tried our implementation of quicksort. When this failed we resorted to our implementation of heapsort.
+Finally we took the numerical derivative of the distribution and compared this to the analytical distribution.
+We first tried Ridder's method for derivation. When this failed we resorted to central differences.
 
+In the second exercise we used three different implementations of root finding algorithms, namely bisection, secant and false position, to find the roots of two equilibrium temperature functions of HII regions.
+Due the rapidly decreasing nature of the functions, bisection performed the best of the three algorithms.
 \end{document}
