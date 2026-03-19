@@ -31,34 +31,34 @@ class LevenbergMarquardt:
         """Construct the Jacobian, the matrix holding partial derivatives i.e. dau y_i/dau p_j for as set of datapoints and another set of parameters.
         So why do we supply an x array instead of a y array? because we fill in x in the analytical partial derivative of each parameter
         """
-        J = np.zeros((len(x), len(partial_derivative_list)))
+        self.J = np.zeros((len(x), len(partial_derivative_list)))
         for i, x_value in enumerate(x):
             for j, partial_derivative in enumerate(partial_derivative_list):
-                J[i, j] = partial_derivative(x_value)
-        return J
+                self.J[i, j] = partial_derivative(x_value)
 
     def construct_covariance_matrix(self, number_of_data_points: int, sigma: Union[float, list, tuple, np.ndarray]):  # noqa: UP007
         if isinstance(sigma, float):  # This is the case for Least Squares, where the standard deviation is constant for all x_i, and there is no correlation between the sigmas for various x_i's
             cov = np.identity(number_of_data_points)
-            return np.identity(number_of_data_points) / sigma**2
-        if isinstance(
-            sigma, Union(list, tuple)
+            self.std2_inverse_matrix = np.identity(number_of_data_points) / sigma**2
+        elif isinstance(
+            sigma, (list, tuple)
         ):  # This is the case for Chi Squared, where the standard deviation can be different for each x_i, but there is no correlation between the sigmas for various x_i's
             if len(sigma) != number_of_data_points:
                 raise ValueError("Length of standard deviation iterable should match number of datapoints")
             cov = np.identity(number_of_data_points)
             for i in range(len(cov)):
                 cov[i, i] /= sigma[i] ** 2
-            return cov
-        if isinstance(
+            self.std2_inverse_matrix = cov
+        elif isinstance(
             sigma, np.ndarray
         ):  # This is the most general case where the standard deviation can be different for each x_i, AND there is can be correlation between the sigmas for various x_i's
             if len(sigma) != number_of_data_points or sigma.shape[0] != sigma.shape[1]:
                 raise ValueError("Length of standard deviation array should match number of datapoints and sigma should be a square array")
-            return 1 / sigma**2
-        raise TypeError("Unknown type supplied to construct covariance matrix method")
+            self.std2_inverse_matrix = 1 / sigma**2
+        else:
+            raise TypeError("Unknown type supplied to construct covariance matrix method")
 
-    def calculate_alpha(self, J: np.ndarray, std2_inverse_matrix: np.ndarray):
+    def calculate_alpha(self, std2_inverse_matrix: np.ndarray):
         """Alpha is the square matrix with nrows = ncols = the number of parameters in the function that we are fitting.
         The nrows and ncols should be equal to the number of columns in the supplied Jacobian.
         std2_inverse_matrix is the inverse of the standard deviations squared of the elements.
@@ -67,10 +67,11 @@ class LevenbergMarquardt:
         # We need to calculate the sum of dau y_i/ dau p_k times dau y_i/dau p_l for the sum of i to N-1, for each combination of k and l.
         # Now for efficiency: we transpose the Jacobian which allows us to do matrix multiplication for each k,l combination
         # Row from k times i matrix times column i times l matrix
-        return J.T @ std2_inverse_matrix @ J
+        self.alpha = self.J.T @ self.std2_inverse_matrix @ self.J
 
     def calculate_beta(self):
-        pass
+        # Do measured y value minus predicted model y value!
+        self.beta = self.J.T @ self.std2_inverse_matrix @
 
 
 def main():
