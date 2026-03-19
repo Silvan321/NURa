@@ -128,7 +128,6 @@ def main():
     plt.ylim(-1e-12, 1e-12)
     plt.semilogx()
     plt.savefig("Plots/equilibrium1_zoomed.png", dpi=600)
-    plt.show()
 
     algorithm_list = [bisection, secant, false_position]
 

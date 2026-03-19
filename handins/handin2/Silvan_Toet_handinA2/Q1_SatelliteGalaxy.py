@@ -13,7 +13,7 @@ from Q1_satellites_sampling import additive_combined_rng, lcg, rng_64bit_xor_shi
 from Q1_satellites_selection import choice, quicksort, selection_sort
 
 
-def n(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
+def n(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.ndarray:
     """Number density profile of satellite galaxies
 
     Parameters

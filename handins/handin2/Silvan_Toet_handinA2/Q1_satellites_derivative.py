@@ -7,7 +7,7 @@ from copy import deepcopy
 import numpy as np
 
 
-def dn_dx(x: float | np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> float | np.ndarray:
+def dn_dx(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.ndarray:
     """Analytical derivative of number density provide
 
     Parameters

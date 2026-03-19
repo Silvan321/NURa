@@ -182,7 +182,6 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\tex\latex\amsfonts\umsb.fd
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm7.tfm
-INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmr12.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
@@ -197,7 +196,6 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\amsfonts\s
 INPUT .\Calculations\satellite_A.txt
 INPUT .\Calculations\satellite_A.txt
 INPUT Calculations\satellite_A.txt
-INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\tex\latex\listings\lstlang1.sty
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\tex\latex\listings\lstlang1.sty
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\tex\latex\listings\lstlang1.sty
@@ -206,6 +204,7 @@ INPUT .\Code\satellites_integrator_code.txt
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt10.tfm
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt8.tfm
 INPUT Code\satellites_integrator_code.txt
+INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tcrm1000.tfm
 INPUT .\Plots\rng_test.png
 INPUT .\Plots\rng_test.png
@@ -346,8 +345,6 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy7.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy7.pfb
-INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti10.pfb
-INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti10.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmtt10.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmtt10.pfb
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmtt8.pfb

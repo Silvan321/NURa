@@ -13,10 +13,10 @@ def rng_64bit_xor_shift(x: np.uint64 = np.uint64(123456789), a_iter: Iterable[np
     Size is the number of random numbers generated. scale_uniform scales the output to the range [0,1]
     If scale_uniform is False, the output is in the range (0, 2^32-1), since we only supply the lowest 32 bits of each generated random number to the user to hide info about the state of the RNG.
     """
+    if x == 0:
+        x = 135797531
     x = np.uint64(x)
     a_list = [np.uint64(a) for a in a_iter]  # Convert all coefficients to np.uint64 variables once, to ensure no error occurs if the user does not supply these in np.uint64 format
-    if x == 0:
-        raise ValueError("x cannot have 0 as a starting value")
 
     random_values_array = np.zeros(size, dtype=np.uint32)
     for i in range(len(random_values_array)):
@@ -37,6 +37,8 @@ def lcg(x: np.uint64 = np.uint64(123456789), a: np.uint64 = np.uint64(7654321), 
     Size is the number of random numbers generated. scale_uniform scales the output to the range [0,1]
     If scale_uniform is False, the output is in the range (0, 2^32-1), since we only supply the lowest 32 bits of each generated random number to the user to hide info about the state of the RNG.
     """
+    if x == 0:
+        x = 135797531
     x, a, c, m = np.uint64(x), np.uint64(a), np.uint64(c), np.uint64(m)  # Cast to unsigned integers should user forget to do so
     random_values_array = np.zeros(size, dtype=np.uint32)
     for i in range(len(random_values_array)):
