@@ -27,7 +27,7 @@ def partial_c(x):
 
 
 class LevenbergMarquardt:
-    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.ndarray):
+    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.float64):
         """Implement the Levenberg Marquardt algorithm.
         x are the abscissa points of the measured data, y are the measured data values.
         partial_derivative_list should contain a list of the partial derivatives of the function to be fitted, with the partial derivative to each parameter.
@@ -131,6 +131,7 @@ class LevenbergMarquardt:
         self.old_chisquare = self._calculate_chisquare()  # Step 1: calculate chisquare for p_0
         self.lmbda = 1e-3
         self._do_iteration()
+        self.num_iterations = 1
 
         while np.abs(self.new_chisquare - self.old_chisquare) > improvement_threshold:  # while solution keeps improving, keep going
             if self.new_chisquare > self.old_chisquare:  # Old solution was better, keep old solution
@@ -139,7 +140,8 @@ class LevenbergMarquardt:
                 self.old_chisquare = self.new_chisquare
                 self.lmbda /= weight  # We are close to the minimum, make smaller steps (more Quasi Newton)
             self._do_iteration()
-        return self.p  # self.p now contains the parameters for the best fit!
+            self.num_iterations += 1
+        return self.p, self.num_iterations  # self.p now contains the parameters for the best fit!
 
 
 if __name__ == "__main__":
@@ -148,7 +150,7 @@ if __name__ == "__main__":
     c = 2
     func_const_filled = partial(func, a=a, b=b, c=c)
     partial_derivative_list = [partial_a, partial_b, partial_c]
-    sigma = 0.00001  # scale set smaller initially
+    sigma = 0.001  # scale set smaller initially
 
     number_of_datapoints = 20
     x = np.linspace(0.5, 4, num=number_of_datapoints)
@@ -166,7 +168,7 @@ if __name__ == "__main__":
     # plt.show()
 
     sigma_list = [sigma for _ in range(number_of_datapoints)]
-    initial_p = np.array([2.1, 1.1, 2.1])
+    initial_p = np.array([3.0, 2.0, 3.0], dtype=np.float64)
 
     lm = LevenbergMarquardt(x, realizations[0], partial_derivative_list, sigma_list, func, initial_p)
     print(lm.iteratively_improve_solution())
