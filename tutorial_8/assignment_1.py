@@ -36,23 +36,27 @@ class LevenbergMarquardt:
         """
         self.x = x
         self.y_measured = y
+        if len(self.x) != len(self.y_measured):
+            raise ValueError("x and y should have same length")
         self.sigma: Union[float, list, tuple, np.ndarray] = sigma  # noqa: UP007 use old typing for compatibility with vdesk
         if np.any(self.sigma == 0):  # works for ints, floats, 1D and 2D arrays
             raise ValueError("No value in sigma can be zero!")
         self.f = f
         self.p = p
+        self.partial_derivative_list = partial_derivative_list
         self._construct_covariance_matrix()
 
     def _calculate_model(self):
+        # calculate the expected (=model) y values by putting the x values together with the current parameter estimation into the function
         self.y_model = self.f(self.x, *self.p)  # unpack the vector of parameters into the function
 
-    def _construct_jacobian(self, partial_derivative_list: list[Callable]):
+    def _construct_jacobian(self):
         """Construct the Jacobian, the matrix holding partial derivatives i.e. dau y_i/dau p_j for as set of datapoints and another set of parameters.
         So why do we supply an x array instead of a y array? because we fill in x in the analytical partial derivative of each parameter
         """
-        self.J = np.zeros((len(self.x), len(partial_derivative_list)))
+        self.J = np.zeros((len(self.x), len(self.partial_derivative_list)))
         for i, x_value in enumerate(self.x):
-            for j, partial_derivative in enumerate(partial_derivative_list):
+            for j, partial_derivative in enumerate(self.partial_derivative_list):
                 self.J[i, j] = partial_derivative(x_value)
 
     def _construct_covariance_matrix(self):
@@ -94,14 +98,12 @@ class LevenbergMarquardt:
         self.alpha = self.J.T @ self.std2_inverse_matrix @ self.J
         self.alpha_accent = self.alpha + np.eye(self.alpha.shape[0]) * self.lmbda
 
-    def _calculate_beta(self, y: np.ndarray):
-        # Do measured y value minus predicted model y value!
-        if len(y) != self.J.shape[0]:
-            raise ValueError("y should be the same length as the number of rows of the Jacobian J!")
-        self.beta = self.J.T @ self.std2_inverse_matrix @ y.T
+    def _calculate_beta(self):
+        # Beta is the residual: The measured y value minus the predicted model y value!
+        self.beta = self.J.T @ self.std2_inverse_matrix @ self.y_delta.T
 
     def _solve_delta_p(self):
-        """Solve the linear system alpha delta_p = beta, for delta_p"""
+        """Solve the linear system alpha_accent delta_p = beta, for delta_p"""
         return np.linalg.solve(self.alpha_accent, self.beta)
 
     def _calculate_chisquare(self):
@@ -111,33 +113,32 @@ class LevenbergMarquardt:
         """
         if not isinstance(self.sigma, (list, tuple)):
             raise TypeError("sigma should be a list or tuple of standard deviations for use in chi square")
-        # calculate the expected y values by putting the x values together with the current parameter estimation into the function
-        return np.sum((self.y_measured - self.y_model) ** 2 * self.std2_inverse_matrix)
+        return np.sum(self.y_delta**2 * self.std2_inv_list)
 
-    def iteratively_improve_solution(self, weight: float = 10.0, improvement_threshold: float = 0.01):
-        self._calculate_model()  # Calculate the y model values for the inicial parameter estimation p_0
-        self.old_chisquare = self._calculate_chisquare()  # Step 1: calculate chisquare for p_0
-        self.lmbda = 1e-3
-        self._construct_jacobian(partial_derivative_list)
+    def _do_iteration(self):
+        self._construct_jacobian()
         self._calculate_alpha()
-        self._calculate_beta(self.y_measured)
+        self._calculate_beta()
         delta_p = self._solve_delta_p()  # solve the linear system of equations to find the change in our parameter estimation
         self.p += delta_p
         self._calculate_model()
+        self.y_delta = self.y_measured - self.y_model  # used for both beta (the residual) and chisquare, only calculate once per model update
         self.new_chisquare = self._calculate_chisquare()
+
+    def iteratively_improve_solution(self, weight: float = 10.0, improvement_threshold: float = 0.01):
+        self._calculate_model()  # Calculate the y model values for the initial parameter estimation p_0
+        self.y_delta = self.y_measured - self.y_model  # used for both beta (the residual) and chisquare, only calculate once per model update
+        self.old_chisquare = self._calculate_chisquare()  # Step 1: calculate chisquare for p_0
+        self.lmbda = 1e-3
+        self._do_iteration()
+
         while np.abs(self.new_chisquare - self.old_chisquare) > improvement_threshold:  # while solution keeps improving, keep going
             if self.new_chisquare > self.old_chisquare:  # Old solution was better, keep old solution
                 self.lmbda *= weight  # We are far from the minimum, make bigger steps (more steepest descent)
             else:  # New solution is better, update old solution to new solution
                 self.old_chisquare = self.new_chisquare
                 self.lmbda /= weight  # We are close to the minimum, make smaller steps (more Quasi Newton)
-            self._construct_jacobian(partial_derivative_list)
-            self._calculate_alpha()
-            self._calculate_beta(self.y_measured)
-            delta_p = self._solve_delta_p()  # solve the linear system of equations to find the change in our parameter estimation
-            self.p += delta_p
-            self._calculate_model()
-            self.new_chisquare = self._calculate_chisquare()
+            self._do_iteration()
         return self.p  # self.p now contains the parameters for the best fit!
 
 
@@ -147,7 +148,7 @@ if __name__ == "__main__":
     c = 2
     func_const_filled = partial(func, a=a, b=b, c=c)
     partial_derivative_list = [partial_a, partial_b, partial_c]
-    sigma = 0.1  # scale set smaller initially
+    sigma = 0.00001  # scale set smaller initially
 
     number_of_datapoints = 20
     x = np.linspace(0.5, 4, num=number_of_datapoints)
@@ -159,10 +160,10 @@ if __name__ == "__main__":
         realization = y_truth + noise
         realizations[i] = realization
 
-    plt.figure()
-    plt.plot(x, func_const_filled(x))
-    plt.plot(x, realizations[0])
-    plt.show()
+    # plt.figure()
+    # plt.plot(x, func_const_filled(x))
+    # plt.plot(x, realizations[0])
+    # plt.show()
 
     sigma_list = [sigma for _ in range(number_of_datapoints)]
     initial_p = np.array([2.1, 1.1, 2.1])
