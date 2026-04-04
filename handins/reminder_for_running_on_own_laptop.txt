@@ -1,0 +1,6 @@
+Because we do not have Python 3.9 on our laptop, we have to do the following when we test our code and latex file:
+1. do ./run.sh in git bash in the folder where the shell script is. this generates the necessary folders
+2. run the Python file manually to generate code and outputs in those folders used by the latex file
+3. generate the latex pdf file.
+
+Repeat all steps when you want to update the latex file!
