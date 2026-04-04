@@ -1,13 +1,18 @@
 # Tutorial 8 Fitting of data
 
 
+import sys
 from collections.abc import Callable
 from functools import partial
-
+from pathlib import Path
 from typing import Union
 
 import numpy as np
 from matplotlib import pyplot as plt
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from tutorial_3.assignment_2 import LUDecomposition
 
 
 def func(x, a, b, c):
@@ -27,23 +32,26 @@ def partial_c(x):
 
 
 class LevenbergMarquardt:
-    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.float64):
+    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.float64, linear=False):
         """Implement the Levenberg Marquardt algorithm.
         x are the abscissa points of the measured data, y are the measured data values.
         partial_derivative_list should contain a list of the partial derivatives of the function to be fitted, with the partial derivative to each parameter.
         f is the function (model) to be fitted to the data, for which we try to find the best-fit parameters
         p is the initial estimation of the parameter vector.
+        linear is a boolean to indicate if the model function to be fitted is linear in its parameters.
+        If that's the case, Levenberg Marquardt will converge to the correct solution in 1 iteration, and we don't have to do a second one to confirm we are not longer improving.
         """
         self.x = x
         self.y_measured = y
         if len(self.x) != len(self.y_measured):
             raise ValueError("x and y should have same length")
+        self.partial_derivative_list = partial_derivative_list
         self.sigma: Union[float, list, tuple, np.ndarray] = sigma  # noqa: UP007 use old typing for compatibility with vdesk
         if np.any(self.sigma == 0):  # works for ints, floats, 1D and 2D arrays
             raise ValueError("No value in sigma can be zero!")
         self.f = f
         self.p = p
-        self.partial_derivative_list = partial_derivative_list
+        self.linear = linear
         self._construct_covariance_matrix()
 
     def _calculate_model(self):
@@ -103,8 +111,10 @@ class LevenbergMarquardt:
         self.beta = self.J.T @ self.std2_inverse_matrix @ self.y_delta.T
 
     def _solve_delta_p(self):
-        """Solve the linear system alpha_accent delta_p = beta, for delta_p"""
-        return np.linalg.solve(self.alpha_accent, self.beta)
+        """Solve the linear system alpha_accent delta_p = beta, for delta_p, using our own implementation of LU Decomposition!"""
+        lu_decomposition_instance = LUDecomposition(self.alpha_accent)
+        return lu_decomposition_instance.solve(self.beta)
+        # np.linalg.solve(self.alpha_accent, self.beta) # Built in np.linalg.solve() if own LU Decomposition algorithm fails
 
     def _calculate_chisquare(self):
         """We calculate the chi squared every time we make a new estimation of our parameter vector p.
@@ -132,6 +142,8 @@ class LevenbergMarquardt:
         self.lmbda = 1e-3
         self._do_iteration()
         self.num_iterations = 1
+        if self.linear:  # If model function is linear in parameters, Levenberg Marquardt will converge to the correct solution in 1 iteration, and we don't have to do a second one to confirm we are not longer improving.
+            return self.p, self.num_iterations
 
         while np.abs(self.new_chisquare - self.old_chisquare) > improvement_threshold:  # while solution keeps improving, keep going
             if self.new_chisquare > self.old_chisquare:  # Old solution was better, keep old solution
@@ -144,7 +156,8 @@ class LevenbergMarquardt:
         return self.p, self.num_iterations  # self.p now contains the parameters for the best fit!
 
 
-if __name__ == "__main__":
+def main():
+    rng = np.random.default_rng(42)
     a = 2
     b = 1
     c = 2
@@ -158,7 +171,10 @@ if __name__ == "__main__":
     realizations = np.zeros((1000, number_of_datapoints))  # We want 1000 realizations of f(x) with different noise values on top. every f(x) consists of 20 datapoints
     for i, _ in enumerate(realizations):
         y_truth = func_const_filled(x)
-        noise = np.random.normal(scale=sigma, size=number_of_datapoints)
+        noise = rng.normal(
+            scale=sigma,
+            size=number_of_datapoints,
+        )
         realization = y_truth + noise
         realizations[i] = realization
 
@@ -170,5 +186,9 @@ if __name__ == "__main__":
     sigma_list = [sigma for _ in range(number_of_datapoints)]
     initial_p = np.array([3.0, 2.0, 3.0], dtype=np.float64)
 
-    lm = LevenbergMarquardt(x, realizations[0], partial_derivative_list, sigma_list, func, initial_p)
+    lm = LevenbergMarquardt(x, realizations[0], partial_derivative_list, sigma_list, func, initial_p, linear=True)
     print(lm.iteratively_improve_solution())
+
+
+if __name__ == "__main__":
+    main()

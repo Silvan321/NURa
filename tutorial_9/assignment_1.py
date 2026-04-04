@@ -29,7 +29,7 @@ def partial_b(x):
     return 1
 
 
-if __name__ == "__main__":
+def main():
     # 1a: Load and plot all datasets
     dataset_to_study = 1
     this_directory = Path(__file__).parent
@@ -55,3 +55,7 @@ if __name__ == "__main__":
     sigma = 1  # Estimate not too big otherwise outliers are not outliers anymore
     lm = LevenbergMarquardt(x, y, partial_derivative_list, sigma)
     print(lm.solve_delta_p())
+
+
+if __name__ == "__main__":
+    main()

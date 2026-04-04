@@ -163,4 +163,5 @@ def main():
     print(f"{x_lu=}")
 
 
-main()
+if __name__ == "__main__":
+    main()
