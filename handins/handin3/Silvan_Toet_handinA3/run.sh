@@ -86,12 +86,15 @@ echo "Running Python script to fit the Number of satellite galaxies..."
 python3 Q1_SatelliteGalaxies.py
 
 # Copy the code to a text file which will be shown in the PDF
-# ADAPT THIS, or in the tex load in only certain lines from these files relevant to the (sub)question!
-cat Q1_SatelliteGalaxies.py > Code/satellites_maximize_code.txt
-cat Q1_SatelliteGalaxies.py > Code/satellites_chi2_code.txt
-cat Q1_SatelliteGalaxies.py > Code/satellites_poisson_code.txt
-cat Q1_SatelliteGalaxies.py > Code/satellites_statistical_tests_code.txt
-cat Q1_SatelliteGalaxies.py > Code/satellites_monte_carlo_code.txt
+
+cat Q1_SatelliteGalaxies.py > Code/satellites_general_code.txt
+cat Q1_golden_section_minimizer.py > Code/satellites_golden_section_minimizer_code.txt
+cat Q1_Levenberg_Marquardt_minimizer.py > Code/satellites_Levenberg_Marquardt_minimizer.txt
+cat Q1_Romberg_integrator.py > Code/satellites_Romberg_integrator.txt
+cat Q1_chi2.py > Code/satellites_chi2_code.txt
+cat Q1_poisson.py > Code/satellites_poisson_code.txt
+cat Q1_statistical_tests.py > Code/satellites_statistical_tests_code.txt
+cat Q1_monte_carlo.py > Code/satellites_monte_carlo_code.txt
 
 echo "Compiling LaTeX..."
 pdflatex -interaction=batchmode NURA_handin_3.tex

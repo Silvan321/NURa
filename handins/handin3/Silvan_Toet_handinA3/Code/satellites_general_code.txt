@@ -1,4 +1,5 @@
 # imports
+from collections.abc import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -61,87 +62,16 @@ def n(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.
         Same type and shape as x. Number density of satellite galaxies
         at given radius x.
     """
-    return 0  # insert your function (copy from hand-in 2)
+    return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
-# Following the lectures, the function below provides a template for a custom minimization method.
-# Depending on your choice of method, you may or may not need to add more function input parameters.
-def my_minimizer(func: callable, x_arr: np.ndarray, bounds: tuple, tol: float = 1e-5) -> tuple:
-    """
-    Custom minimization method.
-
-    Parameters
-    ----------
-    func : callable
-        Function to minimize.
-    x_arr : ndarray
-        Array of x values to evaluate func at.
-    bounds : tuple
-        Tuple of (xmin, xmax) to search for minimum in.
-    tol : float, optional
-        Tolerance for the minimization.
-        The default is 1e-5.
-
-    Returns
-    -------
-    x_min : float
-        Value of x at which func is minimum.
-    func_min : float
-        Minimum value of func.
-    """
-
-    # TODO: implement your minimization method here, e.g. by using a golden section search or Brent's method
-
-    return 0.0, 0.0  # replace by the correct return value(s)
+def N(x: np.ndarray, a: float, b: float, c: float) -> Callable:
+    """N(x) dx is the number of satellites in infinitesimal range [x, x+dx).
+    It is related to n(x) dx, the number density profile according to N(x) dx = n(x) 4pi x**2 dx."""
+    return x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
 #### Fitting ####
-
-
-def chi2(model: callable, data: np.ndarray, params: tuple) -> float:
-    """
-    Calculate the chi-squared for a given set of parameters and data.
-
-    Parameters
-    ----------
-    model : callable
-        The model function to compare to the data.
-    data : ndarray
-        The observed data to compare the model to.
-    params : tuple
-        The parameters to evaluate the model at.
-
-    Returns
-    -------
-    float
-        The chi-squared value for the given parameters and data.
-    """
-    # TODO: implement calculation of the chi2 value (or equivalent) using the model mean and variance to be minimized.
-
-    return 0.0  # replace by the correct value
-
-
-def negative_poisson_ln_likelihood(model: callable, data: np.ndarray, params: tuple) -> float:
-    """
-    Calculate the Poisson negative log-likelihood for a given set of parameters and data.
-
-    Parameters
-    ----------
-    model : callable
-        The model function to compare to the data.
-    data : ndarray
-        The observed data to compare the model to.
-    params : tuple
-        The parameters to evaluate the model at.
-
-    Returns
-    -------
-    float
-        The Poisson negative log-likelihood value for the given parameters and data.
-    """
-    # TODO: implement calculation of the Poisson negative log-likelihood (or equivalent) to be minimized
-
-    return 0.0  # replace by the correct value
 
 
 def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> float:

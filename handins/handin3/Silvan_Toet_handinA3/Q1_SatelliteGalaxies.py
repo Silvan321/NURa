@@ -1,6 +1,10 @@
 # imports
+from collections.abc import Callable
+from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
+
+from Q1_golden_section_minimizer import bracket_minimum, golden_section_search
 
 
 def readfile(filename):
@@ -61,89 +65,16 @@ def n(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.
         Same type and shape as x. Number density of satellite galaxies
         at given radius x.
     """
-    return 0  # insert your function (copy from hand-in 2)
+    return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
-# Following the lectures, the function below provides a template for a custom minimization method.
-# Depending on your choice of method, you may or may not need to add more function input parameters.
-def my_minimizer(func: callable, x_arr: np.ndarray, bounds: tuple, tol: float = 1e-5) -> tuple:
-    """
-    Custom minimization method.
-
-    Parameters
-    ----------
-    func : callable
-        Function to minimize.
-    x_arr : ndarray
-        Array of x values to evaluate func at.
-    bounds : tuple
-        Tuple of (xmin, xmax) to search for minimum in.
-    tol : float, optional
-        Tolerance for the minimization.
-        The default is 1e-5.
-
-    Returns
-    -------
-    x_min : float
-        Value of x at which func is minimum.
-    func_min : float
-        Minimum value of func.
-    """
-
-    # TODO: implement your minimization method here, e.g. by using a golden section search or Brent's method
-
-    return 0.0, 0.0  # replace by the correct return value(s)
+def N(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> Callable:
+    """N(x) dx is the number of satellites in infinitesimal range [x, x+dx).
+    It is related to n(x) dx, the number density profile according to N(x) dx = n(x) 4pi x**2 dx."""
+    return 4 * np.pi * A * Nsat * x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
 #### Fitting ####
-
-
-def chi2(model: callable, data: np.ndarray, params: tuple) -> float:
-    """
-    Calculate the chi-squared for a given set of parameters and data.
-
-    Parameters
-    ----------
-    model : callable
-        The model function to compare to the data.
-    data : ndarray
-        The observed data to compare the model to.
-    params : tuple
-        The parameters to evaluate the model at.
-
-    Returns
-    -------
-    float
-        The chi-squared value for the given parameters and data.
-    """
-    # TODO: implement calculation of the chi2 value (or equivalent) using the model mean and variance to be minimized.
-
-    return 0.0  # replace by the correct value
-
-
-def negative_poisson_ln_likelihood(model: callable, data: np.ndarray, params: tuple) -> float:
-    """
-    Calculate the Poisson negative log-likelihood for a given set of parameters and data.
-
-    Parameters
-    ----------
-    model : callable
-        The model function to compare to the data.
-    data : ndarray
-        The observed data to compare the model to.
-    params : tuple
-        The parameters to evaluate the model at.
-
-    Returns
-    -------
-    float
-        The Poisson negative log-likelihood value for the given parameters and data.
-    """
-    # TODO: implement calculation of the Poisson negative log-likelihood (or equivalent) to be minimized
-
-    return 0.0  # replace by the correct value
-
-
 def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> float:
     """
     Calculate the normalization constant A (which is a function of a,b,c) for the satellite number density profile.
@@ -239,9 +170,29 @@ def do_question_1a():
     Nsat = 100
     A_1a = 256 / (5 * np.pi ** (3 / 2))
     x_lower, x_upper = 10**-4, 5
+    x_range = np.linspace(x_lower, x_upper, num=1000)  # TODO: maybe replace by log axis
 
-    x_max, Nx_max = my_minimizer(lambda x: 0.0, np.array([0.0]), (x_lower, x_upper))
+    fig1a, axs = plt.subplots(1, 2, figsize=(16, 10))
+    plt.suptitle("n(x) dx, the number density profile, compared to N(x) dx, \nthe number of satellites in the infinitesimal range [x, x+dx)")
+    axs[0].plot(x_range, n(x_range, A_1a, Nsat, a, b, c))
+    axs[0].set_title("n(x) dx")
+    axs[1].plot(x_range, N(x_range, A_1a, Nsat, a, b, c))
+    axs[1].set_title("N(x) dx")
+    plt.show()
+    plt.savefig("Plots/nx_vs_Nx.png", dpi=600)
+
+    # First we want to create a 3 point bracket which brackets our maximum
+    # Since our algorithms are designed to find the minimum, we have to input the negative of the function in question
+
+    N_1a = partial(N, A=A_1a, Nsat=Nsat, a=a, b=b, c=c)  # create a partial function with all variables that are given for Q1a fixed
+    N_1a_negative = lambda x: -N_1a(x)  # Create the negative of the function
+    three_point_bracket = bracket_minimum(func=N_1a_negative, a=x_lower, b=x_upper)
+    print(three_point_bracket)
+    x_max, number_of_iterations = golden_section_search(N_1a_negative, *three_point_bracket)
+    Nx_max = N_1a(x_max)
+    print(f"{x_max=}, {Nx_max=}, {number_of_iterations=}")
     # replace with calculation of the maximum of N(x) based on n(x, A, Nsat, a, b, c) and your minimizer
+    # We will use our Golden Section Search minimizer to find the maximum of N(x).
 
     # Write the results to text files for later use in the PDF
     with open("Calculations/satellite_max_x.txt", "w") as f:

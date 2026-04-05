@@ -40,51 +40,41 @@
 \newcommand{\CalcDir}{Calculations}
 
 \title{NURa Hand-in 3}
-\author{Name (Student number)}
-\date{Date}
+\author{Silvan Toet (s1827332)}
+\date{\today}
 
 \begin{document}
 \maketitle
 
-For each halo-mass bin, I fit the same parametric profile
-𝑛
-(
-𝑥
-;
-𝑎
-,
-𝑏
-,
-𝑐
-)
-n(x;a,b,c) separately. This yields five different best-fit parameter sets
-(
-𝑎
-,
-𝑏
-,
-𝑐
-)
-(a,b,c), one for each mass bin. The normalization
-𝐴
-A is not an independent fit parameter, but is recalculated from
-𝑎
-,
-𝑏
-,
-𝑐
-a,b,c for each trial model. Because the radial coordinate is normalized by the virial radius, the model describes the dimensionless shape of the satellite distribution, allowing that shape to vary with halo mass.
-
-\textit{Write a short description of your solution in each section. Explain your choices. Explicitly draw conclusions from your results.}
-
-\textit{You can refer to selected lines of code where you think it is necessary. However, you must provide the full code relevant to each (sub)question below it.}
-
-\textit{Don't forget to describe your figures and mention what conclusions you draw from them!}
-
-
 \section{Satellite galaxies around a massive central}
+We once again have the number density profile for satellite galaxies around a massive central (dark matter) halo.
+The spherical volume element \(dV\) can be defined as follows:
+We know that the volume can be computed in spherical coordinates using the triple integral
+\begin{align}
+  \iiint_V n(x) dV & = \int_{\phi=0}^{2\pi} \int_{\theta=0}^{\pi} \int_{x=0}^{x_{max}} n(x) x^2 \sin\theta \, dx\,d\theta\,d\phi                                                    \\
+                   & = \int_{x=0}^{x_{max}} 4 \pi n(x) x^2 dx = \int_{x=0}^{x_{max}} N(x) dx                                                                                        \\
+                   & = 4 \pi A \langle N_{sat} \rangle \int_{x=0}^{x_{max}=5} x^2 \left(\frac{x}{b}\right)^{a-3} \exp(-\left(\frac{x}{b}\right)^c) dx = \langle N_{sat} \rangle     \\
+                   & = 4 \pi A \langle N_{sat} \rangle \int_{x=0}^{x_{max}=5} x^{a-1} \left(\frac{1}{b}\right)^{a-3} \exp(-\left(\frac{x}{b}\right)^c) dx = \langle N_{sat} \rangle \\
+  -> A             & = \frac{1}{4 \pi \int_{x=0}^{x_{max}=5} x^{a-1} \left(\frac{1}{b}\right)^{a-3} \exp(-\left(\frac{x}{b}\right)^c) dx}
+\end{align}
+Where we have defined the number of satellites N(x)dx in the infinitesimal range [x, x+dx).
+Since n(x) where x is the radius relative to virial radius \(x=r/r_{vir}\) is only dependent on x, we can easily solve for \(\theta\) and \(\phi\).
+Dividing by \(\langle N_{sat} \rangle\) on both sides and rearranging gives us an expression for \(A\).
+
+\lstinputlisting[language=Python]{\CodeDir/satellites_general_code.txt}
 
 \subsection{(1a) Maximum of N(x)}
+For this question we are asked to find the maximum of N(x), the number of satellites in the infinitesimal range [x, x+dx).
+Let us first examine both functions.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{\PlotDir/nx_vs_Nx.png}
+  \caption{n(x) dx, the number density profile, compared to N(x) dx, the number of satellites in the infinitesimal range [x, x+dx)}
+\end{figure}
+
+
+Although n(x), the number density profile, is a monotonically decreasing function, because the number density will decrease with radius, N(x) has a maximum because it can first increase at small x while the x^2 term gets larger, before the exponential decay dominates at larger radii.
+
 
 Explain the maximization algorithm used.
 
@@ -97,6 +87,9 @@ NOTE: all code is reproduced below as an example, show only the relevant lines f
 \lstinputlisting[language=Python]{\CodeDir/satellites_maximize_code.txt}
 
 \subsection{(1b) $\chi^2$-fit}
+For each halo-mass bin, we fit the same parametric profile n(x;a,b,c) separately. This yields five different best-fit parameter sets (a,b,c), one for each mass bin.
+The normalization A is not an independent fit parameter, but is recalculated from a,b,c for each model using Romberg integration.
+Because the radial coordinate is normalized by the virial radius, the model describes the dimensionless shape of the satellite distribution, allowing that shape to vary with halo mass.
 
 Argue the choices of your binning. Explain the minimization routine used. Bonus points for a correctly implemented derivative-based routine.
 
