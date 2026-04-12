@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def negative_poisson_ln_likelihood(model: callable, data: np.ndarray, params: tuple) -> float:
     """
     Calculate the Poisson negative log-likelihood for a given set of parameters and data.

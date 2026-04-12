@@ -29,7 +29,7 @@ fi
 
 if ! python3 -m black --version &>/dev/null ; then
     echo "Black formatter still not found. Have you tried running 'module purge' before run.sh? If so, please contact the lecturer to fix this issue."
-    #exit 1
+    exit 1
 fi
 
 # Format all python files (note that this assumes your python files are all in the same directory as run.sh)
@@ -86,15 +86,12 @@ echo "Running Python script to fit the Number of satellite galaxies..."
 python3 Q1_SatelliteGalaxies.py
 
 # Copy the code to a text file which will be shown in the PDF
-
-cat Q1_SatelliteGalaxies.py > Code/satellites_general.txt
-cat Q1_golden_section_minimizer.py > Code/satellites_golden_section_minimizer.txt
-cat Q1_Levenberg_Marquardt_minimizer.py > Code/satellites_Levenberg_Marquardt_minimizer.txt
-cat Q1_Romberg_integrator.py > Code/satellites_Romberg_integrator.txt
-cat Q1_chi2.py > Code/satellites_chi2.txt
-cat Q1_poisson.py > Code/satellites_poisson.txt
-cat Q1_statistical_tests.py > Code/satellites_statistical_tests.txt
-cat Q1_monte_carlo.py > Code/satellites_monte_carlo.txt
+# ADAPT THIS, or in the tex load in only certain lines from these files relevant to the (sub)question!
+cat Q1_SatelliteGalaxies.py > Code/satellites_maximize_code.txt
+cat Q1_SatelliteGalaxies.py > Code/satellites_chi2_code.txt
+cat Q1_SatelliteGalaxies.py > Code/satellites_poisson_code.txt
+cat Q1_SatelliteGalaxies.py > Code/satellites_statistical_tests_code.txt
+cat Q1_SatelliteGalaxies.py > Code/satellites_monte_carlo_code.txt
 
 echo "Compiling LaTeX..."
 pdflatex -interaction=batchmode NURA_handin_3.tex

@@ -1,7 +1,11 @@
 # imports
 from collections.abc import Callable
+from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
+
+from Q1_golden_section_minimizer import bracket_minimum, golden_section_search
+from Q1_poisson import negative_poisson_ln_likelihood
 
 
 def readfile(filename):
@@ -65,15 +69,13 @@ def n(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.
     return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
-def N(x: np.ndarray, a: float, b: float, c: float) -> Callable:
+def N(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> Callable:
     """N(x) dx is the number of satellites in infinitesimal range [x, x+dx).
     It is related to n(x) dx, the number density profile according to N(x) dx = n(x) 4pi x**2 dx."""
-    return x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
+    return 4 * np.pi * A * Nsat * x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
 #### Fitting ####
-
-
 def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> float:
     """
     Calculate the normalization constant A (which is a function of a,b,c) for the satellite number density profile.
@@ -169,9 +171,29 @@ def do_question_1a():
     Nsat = 100
     A_1a = 256 / (5 * np.pi ** (3 / 2))
     x_lower, x_upper = 10**-4, 5
+    x_range = np.linspace(x_lower, x_upper, num=1000)  # TODO: maybe replace by log axis
 
-    x_max, Nx_max = my_minimizer(lambda x: 0.0, np.array([0.0]), (x_lower, x_upper))
+    fig1a, axs = plt.subplots(1, 2, figsize=(16, 10))
+    plt.suptitle("n(x) dx, the number density profile, compared to N(x) dx, \nthe number of satellites in the infinitesimal range [x, x+dx)")
+    axs[0].plot(x_range, n(x_range, A_1a, Nsat, a, b, c))
+    axs[0].set_title("n(x) dx")
+    axs[1].plot(x_range, N(x_range, A_1a, Nsat, a, b, c))
+    axs[1].set_title("N(x) dx")
+    plt.show()
+    plt.savefig("Plots/nx_vs_Nx.png", dpi=600)
+
+    # First we want to create a 3 point bracket which brackets our maximum
+    # Since our algorithms are designed to find the minimum, we have to input the negative of the function in question
+
+    N_1a = partial(N, A=A_1a, Nsat=Nsat, a=a, b=b, c=c)  # create a partial function with all variables that are given for Q1a fixed
+    N_1a_negative = lambda x: -N_1a(x)  # Create the negative of the function
+    three_point_bracket = bracket_minimum(func=N_1a_negative, a=x_lower, b=x_upper)
+    print(three_point_bracket)
+    x_max, number_of_iterations = golden_section_search(N_1a_negative, *three_point_bracket)
+    Nx_max = N_1a(x_max)
+    print(f"{x_max=}, {Nx_max=}, {number_of_iterations=}")
     # replace with calculation of the maximum of N(x) based on n(x, A, Nsat, a, b, c) and your minimizer
+    # We will use our Golden Section Search minimizer to find the maximum of N(x).
 
     # Write the results to text files for later use in the PDF
     with open("Calculations/satellite_max_x.txt", "w") as f:

@@ -1,3 +1,5 @@
+# Following the lectures, the function below provides a template for a custom minimization method.
+# Depending on your choice of method, you may or may not need to add more function input parameters.
 import math
 from collections.abc import Callable
 
@@ -37,12 +39,9 @@ def bracket_minimum(func: Callable, a: float, b: float) -> tuple[float, float, f
         fa, fb = fb, fc
 
 
-def golden_section_search(func: Callable, a: float, b: float, c: float, rel_target_acc: float = (np.finfo(float).eps) ** 0.5, max_num_iterations: int = 50) -> tuple[None | float, int]:
+def golden_section_search(func: Callable, a: float, b: float, c: float, target_acc: float = (np.finfo(float).eps) ** 0.5, max_num_iterations: int = 50) -> tuple[None | float, int]:
     """Iteratively tighten a 3 point bracket surrounding a minimum. This function assumes there is only 1 minimum inside the bracket.
     Use the algorithm defined in lecture 7 slide 10.
-    For a minimization algorithm we can only hope to get as close to the minimum as the square root of the
-    RELATIVE machine error epsilon times the x-value of the minimum, hence rel_target_acc: float = (np.finfo(float).eps) ** 0.5
-
     """
     phi = (1 + math.sqrt(5)) / 2  # Golden ratio
     w = 2 - phi
@@ -52,7 +51,7 @@ def golden_section_search(func: Callable, a: float, b: float, c: float, rel_targ
     while iteration < max_num_iterations:
         d = b + (other_edge - b) * w
         fb, fd = func(b), func(d)
-        if abs(c - a) < rel_target_acc * b:  # Step 2. rel_target_acc * b to make it absolute target accuracy!
+        if abs(c - a) < target_acc:  # Step 2
             if fd < fb:
                 return d, iteration
             return b, iteration

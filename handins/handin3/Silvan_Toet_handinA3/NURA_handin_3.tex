@@ -61,10 +61,12 @@ Where we have defined the number of satellites N(x)dx in the infinitesimal range
 Since n(x) where x is the radius relative to virial radius \(x=r/r_{vir}\) is only dependent on x, we can easily solve for \(\theta\) and \(\phi\).
 Dividing by \(\langle N_{sat} \rangle\) on both sides and rearranging gives us an expression for \(A\).
 
-\lstinputlisting[language=Python]{\CodeDir/satellites_general_code.txt}
+The general calling code for all subquestions is included below.
+Specific functions used for one or several subquestions are shown at that subquestion.
+\lstinputlisting[language=Python]{\CodeDir/satellites_general.txt}
 
 \subsection{(1a) Maximum of N(x)}
-For this question we are asked to find the maximum of N(x), the number of satellites in the infinitesimal range [x, x+dx).
+For this question we are asked to find the maximum of N(x), the number of satellites in the infinitesimal range [x, x+dx), for given values of a, b, c, $N_{sat}$ and \(A\).
 Let us first examine both functions.
 \begin{figure}[H]
   \centering
@@ -72,19 +74,29 @@ Let us first examine both functions.
   \caption{n(x) dx, the number density profile, compared to N(x) dx, the number of satellites in the infinitesimal range [x, x+dx)}
 \end{figure}
 
+Although n(x), the number density profile, is a monotonically decreasing function, because the number density will decrease with radius,
+N(x) has a maximum because it can first increase at small x while the x$^2$ term gets larger, before the exponential decay dominates at larger radii.
 
-Although n(x), the number density profile, is a monotonically decreasing function, because the number density will decrease with radius, N(x) has a maximum because it can first increase at small x while the x^2 term gets larger, before the exponential decay dominates at larger radii.
+We employ a Golden Section Search minimizer together with the unnamed algorithm for bracketing a minimum to find the maximum of N(x). We first define a partial function $N_{1a}$(x) with a, b, c, $N_{sat}$ and \(A\) filled in.
+We then define a function $N_{1a, neg}$ = -$N_{1a}$(x), the negative of the above function. The reason for this is that a minimization algorithm applied to the negative of a function f(x) can find the x coordinate where f(x) is at a maximum.
+Filling in that x-value then gives us the maximum value of the function.
 
+The unnamed bracketing algorithm starts with two x-value points a and b (not to be confused with the a and b constants of n(x)). It then proposes new points until it certain that the three point bracket a,b,c contains a minimum.
+To show this algorithm is successful in bracketing a minimum, we start it with a=1, b=1.1, even though we can see from the plot the minimum is around x=0.2.
+The three point bracket then becomes ((-0.5326237921249277, 0.15278640450004133, 0.5763932022500207))
 
-Explain the maximization algorithm used.
+The Golden Section Search minimizer divides this three point bracket into smaller and smaller intervals, ensuring the interval to be self-similar.
+This means that if we start with two intervals A (between point a and b) and B (between point b and c), we pick a new point d in such a way that A/B = B/C = $\phi$, the golden ratio.
+Here C is the interval between a and d.
+For each step we test in which interval the minimum is now contained and adjust the outer edges of our bracket accordingly.
+This approach ensures best worst-case behaviour.
 
 The maximum of \(N(x)\) is found at:
 $$x_{\text{max}} \approx  \input{\CalcDir/satellite_max_x.txt} $$
 $$N(x_{\text{max}}) \approx  \input{\CalcDir/satellite_max_Nx.txt} $$
 
 \subsubsection{Code for N(x) maximization}
-NOTE: all code is reproduced below as an example, show only the relevant lines for this exercise here instead.
-\lstinputlisting[language=Python]{\CodeDir/satellites_maximize_code.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_golden_section_minimizer.txt}
 
 \subsection{(1b) $\chi^2$-fit}
 For each halo-mass bin, we fit the same parametric profile n(x;a,b,c) separately. This yields five different best-fit parameter sets (a,b,c), one for each mass bin.
@@ -113,7 +125,7 @@ Argue the choices of your binning. Explain the minimization routine used. Bonus 
 
 \subsubsection{Code for $\chi^2$-fit}
 NOTE: all code is reproduced below as an example, show only the relevant lines for this exercise here instead.
-\lstinputlisting[language=Python]{\CodeDir/satellites_chi2_code.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_chi2.txt}
 
 \subsection{(1c) Poisson ln-likelihood fit}
 
@@ -139,7 +151,7 @@ Explain how you determine the Poisson ln-likelihood. Describe the optimization m
 
 \subsubsection{Code for Poisson ln-likelihood fit}
 NOTE: all code is reproduced below as an example, show only the relevant lines for this exercise here instead.
-\lstinputlisting[language=Python]{\CodeDir/satellites_poisson_code.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_poisson.txt}
 
 \subsection{(1d) Statistical tests}
 
@@ -160,7 +172,7 @@ What can you conclude from the results of the statistical tests?
 
 \subsubsection{Code for statistical tests}
 NOTE: all code is reproduced below as an example, show only the relevant lines for this exercise here instead.
-\lstinputlisting[language=Python]{\CodeDir/satellites_statistical_tests_code.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_statistical_tests.txt}
 
 \subsection{(1e) \textbf{Bonus} Monte Carlo simulation}
 
@@ -180,6 +192,6 @@ Pick a single dataset. Describe the implementation of your Monte Carlo parametri
 
 \subsubsection{Code for Monte Carlo simulation}
 NOTE: all code is reproduced below as an example, show only the relevant lines for this exercise here instead.
-\lstinputlisting[language=Python]{\CodeDir/satellites_monte_carlo_code.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_monte_carlo.txt}
 
 \end{document}

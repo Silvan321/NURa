@@ -1,11 +1,6 @@
 # imports
-from collections.abc import Callable
-from functools import partial
-import matplotlib.pyplot as plt
 import numpy as np
-
-from Q1_golden_section_minimizer import bracket_minimum, golden_section_search
-from Q1_poisson import negative_poisson_ln_likelihood
+import matplotlib.pyplot as plt
 
 
 def readfile(filename):
@@ -66,16 +61,93 @@ def n(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.
         Same type and shape as x. Number density of satellite galaxies
         at given radius x.
     """
-    return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
+    return 0  # insert your function (copy from hand-in 2)
 
 
-def N(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> Callable:
-    """N(x) dx is the number of satellites in infinitesimal range [x, x+dx).
-    It is related to n(x) dx, the number density profile according to N(x) dx = n(x) 4pi x**2 dx."""
-    return 4 * np.pi * A * Nsat * x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
+# Following the lectures, the function below provides a template for a custom minimization method.
+# Depending on your choice of method, you may or may not need to add more function input parameters.
+def my_minimizer(
+    func: callable, x_arr: np.ndarray, bounds: tuple, tol: float = 1e-5
+) -> tuple:
+    """
+    Custom minimization method.
+
+    Parameters
+    ----------
+    func : callable
+        Function to minimize.
+    x_arr : ndarray
+        Array of x values to evaluate func at.
+    bounds : tuple
+        Tuple of (xmin, xmax) to search for minimum in.
+    tol : float, optional
+        Tolerance for the minimization.
+        The default is 1e-5.
+
+    Returns
+    -------
+    x_min : float
+        Value of x at which func is minimum.
+    func_min : float
+        Minimum value of func.
+    """
+
+    # TODO: implement your minimization method here, e.g. by using a golden section search or Brent's method
+
+    return 0.0, 0.0  # replace by the correct return value(s)
 
 
 #### Fitting ####
+
+
+def chi2(model: callable, data: np.ndarray, params: tuple) -> float:
+    """
+    Calculate the chi-squared for a given set of parameters and data.
+
+    Parameters
+    ----------
+    model : callable
+        The model function to compare to the data.
+    data : ndarray
+        The observed data to compare the model to.
+    params : tuple
+        The parameters to evaluate the model at.
+
+    Returns
+    -------
+    float
+        The chi-squared value for the given parameters and data.
+    """
+    # TODO: implement calculation of the chi2 value (or equivalent) using the model mean and variance to be minimized.
+
+    return 0.0  # replace by the correct value
+
+
+def negative_poisson_ln_likelihood(
+    model: callable, data: np.ndarray, params: tuple
+) -> float:
+    """
+    Calculate the Poisson negative log-likelihood for a given set of parameters and data.
+
+    Parameters
+    ----------
+    model : callable
+        The model function to compare to the data.
+    data : ndarray
+        The observed data to compare the model to.
+    params : tuple
+        The parameters to evaluate the model at.
+
+    Returns
+    -------
+    float
+        The Poisson negative log-likelihood value for the given parameters and data.
+    """
+    # TODO: implement calculation of the Poisson negative log-likelihood (or equivalent) to be minimized
+
+    return 0.0  # replace by the correct value
+
+
 def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> float:
     """
     Calculate the normalization constant A (which is a function of a,b,c) for the satellite number density profile.
@@ -124,12 +196,16 @@ def minimize_chi2(model: callable, data: np.ndarray, initial_params: tuple) -> t
     # TODO: implement the minimization of chi2 using your custom method. Remember to normalize for each minimization step
 
     best_params = initial_params
-    min_chi2 = chi2(model, data, initial_params)  # replace by the correct calculation of chi2 for the given parameters
+    min_chi2 = chi2(
+        model, data, initial_params
+    )  # replace by the correct calculation of chi2 for the given parameters
 
     return best_params, min_chi2
 
 
-def minimize_poisson_ln_likelihood(model: callable, data: np.ndarray, initial_params: tuple) -> tuple:
+def minimize_poisson_ln_likelihood(
+    model: callable, data: np.ndarray, initial_params: tuple
+) -> tuple:
     """
     Minimize the Poisson negative log-likelihood for a given model and data.
 
@@ -153,7 +229,9 @@ def minimize_poisson_ln_likelihood(model: callable, data: np.ndarray, initial_pa
     # TODO: implement the minimization of the Poisson negative log-likelihood using your custom method. Remember to normalize for each minimization step
 
     best_params = initial_params
-    min_ln_likelihood = negative_poisson_ln_likelihood(model, data, initial_params)  # replace by the correct calculation of the Poisson negative log-likelihood for the given parameters
+    min_ln_likelihood = negative_poisson_ln_likelihood(
+        model, data, initial_params
+    )  # replace by the correct calculation of the Poisson negative log-likelihood for the given parameters
 
     return best_params, min_ln_likelihood
 
@@ -170,35 +248,10 @@ def do_question_1a():
     c = 1.6
     Nsat = 100
     A_1a = 256 / (5 * np.pi ** (3 / 2))
-    bounds_for_maximization_and_integration = (0, 5)
     x_lower, x_upper = 10**-4, 5
-    x_range = np.linspace(x_lower, x_upper, num=1000)  # TODO: maybe replace by log axis
 
-    fig1a, axs = plt.subplots(1, 2, figsize=(16, 10))
-    plt.suptitle("n(x) dx, the number density profile, compared to N(x) dx, \nthe number of satellites in the infinitesimal range [x, x+dx)")
-    axs[0].plot(x_range, n(x_range, A_1a, Nsat, a, b, c))
-    axs[0].set_title("n(x) dx")
-    axs[1].plot(x_range, N(x_range, A_1a, Nsat, a, b, c))
-    axs[1].set_title("N(x) dx")
-    plt.show()
-    plt.savefig("Plots/nx_vs_Nx.png", dpi=600)
-
-    # First we want to create a 3 point bracket which brackets our maximum
-    # Since our algorithms are designed to find the minimum, we have to input the negative of the function in question
-
-    N_1a = partial(N, A=A_1a, Nsat=Nsat, a=a, b=b, c=c)  # create a partial function with all variables that are given for Q1a fixed
-    N_1a_negative = lambda x: -N_1a(x)  # Create the negative of the function
-    three_point_bracket = bracket_minimum(func=N_1a_negative, a=1, b=1.1)
-    print(three_point_bracket)
-    x_max, number_of_iterations = golden_section_search(N_1a_negative, *three_point_bracket)
-    Nx_max = N_1a(x_max)
-    print(f"{x_max=}, {Nx_max=}, {number_of_iterations=}")
+    x_max, Nx_max = my_minimizer(lambda x: 0.0, np.array([0.0]), (x_lower, x_upper))
     # replace with calculation of the maximum of N(x) based on n(x, A, Nsat, a, b, c) and your minimizer
-    # We will use our Golden Section Search minimizer to find the maximum of N(x).
-    # Note that I am a bit confused that the template used 1e-4 to 5 as the x range to find the maximum, whereas the question asks to find the maximum between 0 and 5.
-    # When I replaced the bounds 0 to 5 in the previous handin for the integration constant calculation to 1e-20 to 5 to solve a 0^x problem in Python, I lost points
-    # I have now incorporated the hint that this 0^x problem can be alleviated by combining the x^2 with the x^(a-3) term so I will use the true 0 to 5 x range in my calculation for A this time,
-    # Since I don't expect a to go below 1 while fitting the data and give the same problem.
 
     # Write the results to text files for later use in the PDF
     with open("Calculations/satellite_max_x.txt", "w") as f:
@@ -233,13 +286,21 @@ def do_question_1b():
         # Store N_sat, chi2 values and best-fit parameters in their arrays
         N_sat.append(0.0)
         min_chi2_values.append(0.0)
-        best_params_chi2.append((0.0, 0.0, 0.0))  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization
+        best_params_chi2.append(
+            (0.0, 0.0, 0.0)
+        )  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization
 
         # Plot the data and the best-fit model for each data file in a subplot.
-        axs[datafiles.index(datafile)].hist([], bins=bins)  # plot the histogram of the data
+        axs[datafiles.index(datafile)].hist(
+            [], bins=bins
+        )  # plot the histogram of the data
 
-        x_plot = np.linspace(x_lower, x_upper, 100)  # create x_array for plotting the model
-        axs[datafiles.index(datafile)].plot(x_plot, np.ones_like(x_plot))  # plot the best-fit model using the best-fit parameters found from chi-squared minimization
+        x_plot = np.linspace(
+            x_lower, x_upper, 100
+        )  # create x_array for plotting the model
+        axs[datafiles.index(datafile)].plot(
+            x_plot, np.ones_like(x_plot)
+        )  # plot the best-fit model using the best-fit parameters found from chi-squared minimization
 
         # Add labels and title to the subplot
         axs[datafiles.index(datafile)].set_title(f"Data file: {datafile}")
@@ -260,7 +321,9 @@ def do_question_1b():
         for idx, (N, chi2_val, params) in enumerate(rows):
             a, b, c = params
             line_end = " \\\\" if idx < len(rows) - 1 else ""
-            f.write(f"m{idx + 11} & {N:.5f} & {chi2_val:.5f} & {a:.5f} & {b:.5f} & {c:.5f}{line_end}\n")
+            f.write(
+                f"m{idx+11} & {N:.5f} & {chi2_val:.5f} & {a:.5f} & {b:.5f} & {c:.5f}{line_end}\n"
+            )
 
 
 def do_question_1c():
@@ -285,12 +348,20 @@ def do_question_1c():
 
         # Store poisson llh values and best-fit parameters in their arrays
         min_poisson_llh_values.append(0.0)
-        best_params_poisson.append((0.0, 0.0, 0.0))  # replace by the correct best-fit parameters (a,b,c) found from Poisson negative log-likelihood minimization
+        best_params_poisson.append(
+            (0.0, 0.0, 0.0)
+        )  # replace by the correct best-fit parameters (a,b,c) found from Poisson negative log-likelihood minimization
 
         # Plot the data and the best-fit model for each data file in a subplot.
-        axs[datafiles.index(datafile)].hist([], bins=10)  # plot the histogram of the data
-        x_plot = np.linspace(x_lower, x_upper, 100)  # create x_array for plotting the model
-        axs[datafiles.index(datafile)].plot(x_plot, np.ones_like(x_plot))  # plot the best-fit model using the best-fit parameters found from Poisson negative log-likelihood minimization
+        axs[datafiles.index(datafile)].hist(
+            [], bins=10
+        )  # plot the histogram of the data
+        x_plot = np.linspace(
+            x_lower, x_upper, 100
+        )  # create x_array for plotting the model
+        axs[datafiles.index(datafile)].plot(
+            x_plot, np.ones_like(x_plot)
+        )  # plot the best-fit model using the best-fit parameters found from Poisson negative log-likelihood minimization
 
         # Add labels and title to the subplot
         axs[datafiles.index(datafile)].set_title(f"Data file: {datafile}")
@@ -311,7 +382,9 @@ def do_question_1c():
         for idx, (llh_val, params) in enumerate(rows):
             a, b, c = params
             line_end = " \\\\" if idx < len(rows) - 1 else ""
-            f.write(f"m{idx + 11} & {llh_val:.5f} & {a:.5f} & {b:.5f} & {c:.5f}{line_end}\n")
+            f.write(
+                f"m{idx+11} & {llh_val:.5f} & {a:.5f} & {b:.5f} & {c:.5f}{line_end}\n"
+            )
 
 
 def do_question_1d():
@@ -359,7 +432,9 @@ def do_question_1e():
     # ======== Question 1e: Monte Carlo simulations ========
     # pick one of the data files to perform the Monte Carlo simulations on, e.g. m12
     datafiles = ["m11", "m12", "m13", "m14", "m15"]
-    index = 1  # index of the data file to use for Monte Carlo simulations, e.g. 1 for m12
+    index = (
+        1  # index of the data file to use for Monte Carlo simulations, e.g. 1 for m12
+    )
 
     radius, nhalo = readfile(f"Data/satgals_{datafiles[index]}.txt")
 
@@ -372,12 +447,17 @@ def do_question_1e():
 
     num_pseudo_experiments = 10  # replace by number with reasonable runtime
     for i in range(num_pseudo_experiments):
+
         # TODO: generate pseudo-data by sampling from original best-fit chi2 and poisson models
         # Then, for each pseudo-dataset, perform the chi2 and poisson fits to find the best-fit parameters.
 
         # Append the best-fit parameters for each pseudo-dataset to their respective arrays.
-        pseudo_chi2_params.append((0.0, 0.0, 0.0))  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization for the pseudo-dataset
-        pseudo_poisson_params.append((0.0, 0.0, 0.0))  # replace by the correct best-fit parameters (a,b,c) found from Poisson negative log-likelihood minimization for the pseudo-dataset
+        pseudo_chi2_params.append(
+            (0.0, 0.0, 0.0)
+        )  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization for the pseudo-dataset
+        pseudo_poisson_params.append(
+            (0.0, 0.0, 0.0)
+        )  # replace by the correct best-fit parameters (a,b,c) found from Poisson negative log-likelihood minimization for the pseudo-dataset
 
     # plot the pseudo best-fit profiles, plot the original best-fit profile in another color and plot the mean in one more color
 
@@ -385,12 +465,20 @@ def do_question_1e():
     x_plot = np.linspace(1e-4, 5, 100)  # create x_array for plotting the model
     plt.figure(figsize=(6.4, 4.8))
     for params in pseudo_chi2_params:
-        plt.plot(x_plot, np.ones_like(x_plot))  # plot the best-fit model for each pseudo-dataset using the best-fit parameters found from chi-squared minimization
+        plt.plot(
+            x_plot, np.ones_like(x_plot)
+        )  # plot the best-fit model for each pseudo-dataset using the best-fit parameters found from chi-squared minimization
 
-    plt.plot(x_plot, np.ones_like(x_plot))  # plot the original best-fit model using the best-fit parameters found from chi-squared minimization on the real data
+    plt.plot(
+        x_plot, np.ones_like(x_plot)
+    )  # plot the original best-fit model using the best-fit parameters found from chi-squared minimization on the real data
 
-    mean_params_chi2 = np.mean(pseudo_chi2_params, axis=0)  # calculate the mean of the best-fit parameters from the pseudo-datasets
-    plt.plot(x_plot, np.ones_like(x_plot))  # plot the mean of the best-fit models from the pseudo-datasets
+    mean_params_chi2 = np.mean(
+        pseudo_chi2_params, axis=0
+    )  # calculate the mean of the best-fit parameters from the pseudo-datasets
+    plt.plot(
+        x_plot, np.ones_like(x_plot)
+    )  # plot the mean of the best-fit models from the pseudo-datasets
 
     plt.title(f"Monte Carlo simulations - chi2 fit - Data file: {datafiles[index]}")
     plt.xlabel("x = r / r_virial")
@@ -404,11 +492,19 @@ def do_question_1e():
     x_plot = np.linspace(1e-4, 5, 100)  # create x_array for plotting the model
     plt.figure(figsize=(6.4, 4.8))
     for params in pseudo_poisson_params:
-        plt.plot(x_plot, np.ones_like(x_plot))  # plot the best-fit model for each pseudo-dataset using the best-fit parameters found from Poisson negative log-likelihood minimization
-    plt.plot(x_plot, np.ones_like(x_plot))  # plot the original best-fit model using the best-fit parameters found from Poisson negative log-likelihood minimization on the real data
+        plt.plot(
+            x_plot, np.ones_like(x_plot)
+        )  # plot the best-fit model for each pseudo-dataset using the best-fit parameters found from Poisson negative log-likelihood minimization
+    plt.plot(
+        x_plot, np.ones_like(x_plot)
+    )  # plot the original best-fit model using the best-fit parameters found from Poisson negative log-likelihood minimization on the real data
 
-    mean_params_poisson = np.mean(pseudo_poisson_params, axis=0)  # calculate the mean of the best-fit parameters from the pseudo-datasets
-    plt.plot(x_plot, np.ones_like(x_plot))  # plot the mean of the best-fit models from the pseudo-datasets
+    mean_params_poisson = np.mean(
+        pseudo_poisson_params, axis=0
+    )  # calculate the mean of the best-fit parameters from the pseudo-datasets
+    plt.plot(
+        x_plot, np.ones_like(x_plot)
+    )  # plot the mean of the best-fit models from the pseudo-datasets
 
     plt.title(f"Monte Carlo simulations - Poisson fit - Data file: {datafiles[index]}")
     plt.xlabel("x = r / r_virial")
