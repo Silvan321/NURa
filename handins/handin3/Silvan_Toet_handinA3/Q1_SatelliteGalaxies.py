@@ -1,10 +1,11 @@
 # imports
 from collections.abc import Callable
 from functools import partial
+
 import matplotlib.pyplot as plt
 import numpy as np
-
 from Q1_golden_section_minimizer import bracket_minimum, golden_section_search
+from Q1_nx_Nx_and_A import N, get_normalization_constant, n
 from Q1_poisson import negative_poisson_ln_likelihood
 
 
@@ -39,65 +40,6 @@ def readfile(filename):
         radius,
         nhalo,
     )  # Return the virial radius for all the satellites in the file, and the number of halos
-
-
-def n(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.ndarray:
-    """
-    Number density profile of satellite galaxies
-
-    Parameters
-    ----------
-    x : ndarray
-        Radius in units of virial radius; x = r / r_virial
-    A : float
-        Normalisation
-    Nsat : float
-        Average number of satellites
-    a : float
-        Small-scale slope
-    b : float
-        Transition scale
-    c : float
-        Steepness of exponential drop-off
-
-    Returns
-    -------
-    ndarray
-        Same type and shape as x. Number density of satellite galaxies
-        at given radius x.
-    """
-    return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
-
-
-def N(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> Callable:
-    """N(x) dx is the number of satellites in infinitesimal range [x, x+dx).
-    It is related to n(x) dx, the number density profile according to N(x) dx = n(x) 4pi x**2 dx."""
-    return 4 * np.pi * A * Nsat * x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
-
-
-#### Fitting ####
-def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> float:
-    """
-    Calculate the normalization constant A (which is a function of a,b,c) for the satellite number density profile.
-
-    Parameters
-    ----------
-    a : float
-        Small-scale slope.
-    b : float
-        Transition scale.
-    c : float
-        Steepness of exponential drop-off.
-    Nsat : float
-        Average number of satellites.
-
-    Returns
-    -------
-    float
-        Normalization constant A.
-    """
-    # TODO: implement the calculation of the normalization constant
-    return 0.0  # replace by the correct value
 
 
 def minimize_chi2(model: callable, data: np.ndarray, initial_params: tuple) -> tuple:
@@ -180,7 +122,6 @@ def do_question_1a():
     axs[0].set_title("n(x) dx")
     axs[1].plot(x_range, N(x_range, A_1a, Nsat, a, b, c))
     axs[1].set_title("N(x) dx")
-    plt.show()
     plt.savefig("Plots/nx_vs_Nx.png", dpi=600)
 
     # First we want to create a 3 point bracket which brackets our maximum
@@ -195,7 +136,8 @@ def do_question_1a():
     print(f"{x_max=}, {Nx_max=}, {number_of_iterations=}")
     # replace with calculation of the maximum of N(x) based on n(x, A, Nsat, a, b, c) and your minimizer
     # We will use our Golden Section Search minimizer to find the maximum of N(x).
-    # Note that I am a bit confused that the template used 1e-4 to 5 as the x range to find the maximum, whereas the question asks to find the maximum between 0 and 5.
+
+    # Note that I am a bit confused that the template used 1e-4 to 5 as the x range to find the maximum (and did not say to replace the bounds), whereas the question asks to find the maximum between 0 and 5.
     # When I replaced the bounds 0 to 5 in the previous handin for the integration constant calculation to 1e-20 to 5 to solve a 0^x problem in Python, I lost points
     # I have now incorporated the hint that this 0^x problem can be alleviated by combining the x^2 with the x^(a-3) term so I will use the true 0 to 5 x range in my calculation for A this time,
     # Since I don't expect a to go below 1 while fitting the data and give the same problem.
@@ -221,12 +163,13 @@ def do_question_1b():
 
     for datafile in datafiles:
         radius, nhalo = readfile(f"Data/satgals_{datafile}.txt")
+        print(f"{datafile=}, {np.min(radius)=}, {np.max(radius)=} {nhalo=}")
 
         x_lower, x_upper = (
             10**-4,
             5,
         )  # replace by appropriate limits for x based on the data
-        bins = 10  # choose appropriate bins
+        bins = 30  # choose appropriate bins
 
         # TODO: implement the fitting of N(x) to the data using chi-squared minimization.
 

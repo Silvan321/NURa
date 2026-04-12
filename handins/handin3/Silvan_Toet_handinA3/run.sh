@@ -88,6 +88,7 @@ python3 Q1_SatelliteGalaxies.py
 # Copy the code to a text file which will be shown in the PDF
 
 cat Q1_SatelliteGalaxies.py > Code/satellites_general.txt
+cat Q1_nx_Nx_and_A.py > Code/satellites_nx_Nx_and_A.txt
 cat Q1_golden_section_minimizer.py > Code/satellites_golden_section_minimizer.txt
 cat Q1_Levenberg_Marquardt_minimizer.py > Code/satellites_Levenberg_Marquardt_minimizer.txt
 cat Q1_Romberg_integrator.py > Code/satellites_Romberg_integrator.txt

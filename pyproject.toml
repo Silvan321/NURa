@@ -97,4 +97,6 @@ ignore = [
 
     # casting
     "TC006",
+
+    "N999",
 ]

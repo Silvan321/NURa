@@ -64,6 +64,7 @@ Dividing by \(\langle N_{sat} \rangle\) on both sides and rearranging gives us a
 The general calling code for all subquestions is included below.
 Specific functions used for one or several subquestions are shown at that subquestion.
 \lstinputlisting[language=Python]{\CodeDir/satellites_general.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_nx_Nx_and_A.txt}
 
 \subsection{(1a) Maximum of N(x)}
 For this question we are asked to find the maximum of N(x), the number of satellites in the infinitesimal range [x, x+dx), for given values of a, b, c, $N_{sat}$ and \(A\).
@@ -77,13 +78,15 @@ Let us first examine both functions.
 Although n(x), the number density profile, is a monotonically decreasing function, because the number density will decrease with radius,
 N(x) has a maximum because it can first increase at small x while the x$^2$ term gets larger, before the exponential decay dominates at larger radii.
 
-We employ a Golden Section Search minimizer together with the unnamed algorithm for bracketing a minimum to find the maximum of N(x). We first define a partial function $N_{1a}$(x) with a, b, c, $N_{sat}$ and \(A\) filled in.
+Since this is a one-dimensional minimization problem, we employ a Golden Section Search minimizer together with the unnamed algorithm for bracketing a minimum to find the maximum of N(x). We first define a partial function $N_{1a}$(x) with a, b, c, $N_{sat}$ and \(A\) filled in.
 We then define a function $N_{1a, neg}$ = -$N_{1a}$(x), the negative of the above function. The reason for this is that a minimization algorithm applied to the negative of a function f(x) can find the x coordinate where f(x) is at a maximum.
-Filling in that x-value then gives us the maximum value of the function.
+Filling in that x-value in $N_{1a}$(x) gives us the maximum value of the function.
 
-The unnamed bracketing algorithm starts with two x-value points a and b (not to be confused with the a and b constants of n(x)). It then proposes new points until it certain that the three point bracket a,b,c contains a minimum.
+The unnamed bracketing algorithm starts with two x-value points a and b (not to be confused with the a and b constants of n(x)). It then proposes new points until it is certain that the three point bracket a,b,c contains a minimum.
 To show this algorithm is successful in bracketing a minimum, we start it with a=1, b=1.1, even though we can see from the plot the minimum is around x=0.2.
-The three point bracket then becomes ((-0.5326237921249277, 0.15278640450004133, 0.5763932022500207))
+The three point bracket then becomes (-0.5326237921249277, 0.15278640450004133, 0.5763932022500207).
+Note that the first point is outside the provided x range (0,5).
+In this case this is not a problem as there are no additional local minima and the function is defined outside the range (0,5), but it is something to always keep in mind when applying this algorithm.
 
 The Golden Section Search minimizer divides this three point bracket into smaller and smaller intervals, ensuring the interval to be self-similar.
 This means that if we start with two intervals A (between point a and b) and B (between point b and c), we pick a new point d in such a way that A/B = B/C = $\phi$, the golden ratio.
@@ -99,9 +102,72 @@ $$N(x_{\text{max}}) \approx  \input{\CalcDir/satellite_max_Nx.txt} $$
 \lstinputlisting[language=Python]{\CodeDir/satellites_golden_section_minimizer.txt}
 
 \subsection{(1b) $\chi^2$-fit}
-For each halo-mass bin, we fit the same parametric profile n(x;a,b,c) separately. This yields five different best-fit parameter sets (a,b,c), one for each mass bin.
+
+For each halo-mass bin, we want to fit the same parametric profile N(x;a,b,c) separately. This yields five different best-fit parameter sets (a,b,c), one for each mass bin.
 The normalization A is not an independent fit parameter, but is recalculated from a,b,c for each model using Romberg integration.
 Because the radial coordinate is normalized by the virial radius, the model describes the dimensionless shape of the satellite distribution, allowing that shape to vary with halo mass.
+
+We are first asked to choose any number of radial bins, real or log space and x range.
+Since it is not clear from the question if this should vary per file, we assume our choices should be constant over all files (also because these choices are not variables in the template code for this question).
+
+After reading in all files, we calculate the smallest and largest radius of all the satellite galaxies per halo.
+It turns out that there are no satellite galaxies with an x coordinate smaller than 1e-4, so we choose this as our $x_{min}$ value.
+The maximum x coordinate is around 2.5, so we simply keep $x_{max}$ = 5 as our $x_{max}$ value.
+We choose logarithmically spaced bins in x to ensure sufficient resolution in the inner regions, where the satellite density varies rapidly, while still sampling the outer regions efficiently.
+We use 30 bins to balance resolution against Poisson noise, ensuring each bin contains a sufficient number of satellites.
+
+We choose Levenberg-Marquardt as our minimization routine for the fitting procedure, because we are dealing with a model nonlinear in its parameters,
+we are proud of our LM class implementation and want to try a derivative based method for bonus points.
+
+Since we are fitting our model to binned data, we are comparing the observed mean number of satellites per halo in radial bin i $N_i$, to the
+model prediction $\tilde{N_i}$ for the mean number of satellites per halo in radial bin i.
+
+Our model is thus
+\begin{align}
+  \tilde{N_i} = 4 \pi \langle N_{sat} \rangle A(a,b,c) I_i(a,b,c)
+\end{align}
+where we define
+\begin{align}
+  I_i(a,b,c) = \int_{x=i}^{x_{i+1}} x^2 \left(\frac{x}{b}\right)^{a-3} \exp(-\left(\frac{x}{b}\right)^c) dx = \int_{x=i}^{x_{i+1}} f(x) x^2 dx
+\end{align}
+
+and
+\begin{align}
+  I_{total} = \int_{x=0}^{x_{max}} f(x) x^2 dx
+\end{align}
+
+Note that A is dependent on a, b and c. The partial derivative of $\tilde{N_i}$ to each parameter is thus obtained using the product rule
+\begin{align}
+  \frac{\partial \tilde{N_i}}{\partial p} = 4 \pi \langle N_{sat} \rangle \left(\frac{\partial A(a,b,c)}{\partial p} I_i(a,b,c) + A(a,b,c) \frac{\partial I_i(a,b,c)}{\partial p}\right)
+\end{align}
+
+Calculating the partial derivatives of f(x) with respect to a, b and c gives
+\begin{align}
+  \frac{\partial f(x)}{\partial a} = f(x) ln \left(\frac{x}{b}\right)
+\end{align}
+
+\begin{align}
+  \frac{\partial f(x)}{\partial b} = f(x) \left(-\frac{a-3}{b} + \frac{c}{b}\left(\frac{x}{b}\right)^c\right)
+\end{align}
+
+\begin{align}
+  \frac{\partial f(x)}{\partial c} = - f(x) \left(\frac{x}{b}\right)^c ln \left(\frac{x}{b}\right)
+\end{align}
+
+This gives for all p
+\begin{align}
+  \frac{\partial I_i}{\partial p} = \int_{x_i}^{x_{i+1}} \frac{\partial f(x)}{\partial p} x^2 dx
+\end{align}
+
+And using $ A = (4 \pi I_{total})^{-1}$
+\begin{align}
+  \frac{\partial A}{\partial p} = - 4 \pi A^2 \frac{\partial I_{total}}{\partial p}
+\end{align}
+
+So
+\begin{align}
+  \frac{\partial \tilde{N_i}}{\partial p} = 4 \pi \langle N_{sat} \rangle A \left(\frac{\partial I_i}{\partial p} - \frac{I_i}{I_{total}} \frac{\partial I_{total}}{\partial p}\right)
+\end{align}
 
 Argue the choices of your binning. Explain the minimization routine used. Bonus points for a correctly implemented derivative-based routine.
 

@@ -202,6 +202,9 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmtt8.t
 INPUT Code\satellites_general.txt
 INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tctt0800.tfm
+INPUT .\Code\satellites_nx_Nx_and_A.txt
+INPUT .\Code\satellites_nx_Nx_and_A.txt
+INPUT Code\satellites_nx_Nx_and_A.txt
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
 INPUT .\Plots\nx_vs_Nx.png
 INPUT .\Plots\nx_vs_Nx.png
