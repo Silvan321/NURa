@@ -14,7 +14,7 @@ def trapezoid(a, b, func, N: int):
     return h * (0.5 * (func(b) + func(a)) + np.sum(func(xdata[1:-1])))
 
 
-def romberg_vector_version(a, b, func, N_start: int, order: int = 5, return_error: bool = False):
+def romberg_vector_version(a, b, func, N_start: int = 100, order: int = 5, return_error: bool = False):
     """See slide 14 of Lecture 4 annotated slides for the formula used.
     N_start is the initial number of function evaluations. This will double with every order.
     order is the number of initial approximations.

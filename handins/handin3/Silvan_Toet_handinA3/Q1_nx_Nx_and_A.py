@@ -1,7 +1,9 @@
 # I have moved these functions to a separate file to prevent circular import errors
 from collections.abc import Callable
+from functools import partial
 
 import numpy as np
+from Q1_Romberg_integrator import romberg_vector_version
 
 
 def n_func(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -> np.ndarray:
@@ -32,7 +34,7 @@ def n_func(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -
     return A * Nsat * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
-def helper_func(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
+def f_profile(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
     return (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
@@ -42,8 +44,12 @@ def N_func(x: np.ndarray, A: float, Nsat: float, a: float, b: float, c: float) -
     return 4 * np.pi * A * Nsat * x ** (a - 1) * (1 / b) ** (a - 3) * np.exp(-((x / b) ** c))
 
 
+def general_integrand(x: np.ndarray, a: float, b: float, c: float) -> Callable:
+    return x**2 * (x / b) ** (a - 3) * np.exp(-((x / b) ** c))
+
+
 #### Fitting ####
-def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> float:
+def get_normalization_constant(a: float, b: float, c: float) -> float:
     """
     Calculate the normalization constant A (which is a function of a,b,c) for the satellite number density profile.
 
@@ -55,13 +61,12 @@ def get_normalization_constant(a: float, b: float, c: float, Nsat: float) -> flo
         Transition scale.
     c : float
         Steepness of exponential drop-off.
-    Nsat : float
-        Average number of satellites.
 
     Returns
     -------
     float
         Normalization constant A.
     """
-    # TODO: implement the calculation of the normalization constant
-    return 0.0  # replace by the correct value
+    specific_integrand = partial(general_integrand, a=a, b=b, c=c)  # Use a partial function to set a, b and c to the given values in general_integrand but still keep it as a function
+    integral, _ = romberg_vector_version(a, b, func=specific_integrand, N_start=100, order=12, return_error=True)  # set romberg to order 12 to ensure we have reached the best solution
+    return 1 / (4 * np.pi * integral)

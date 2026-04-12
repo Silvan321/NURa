@@ -3,58 +3,45 @@ from functools import partial
 from typing import Union
 
 import numpy as np
-from Q1_nx_Nx_and_A import N_func, helper_func, get_normalization_constant, n_func
+from Q1_nx_Nx_and_A import N_func, f_profile, get_normalization_constant, n_func
 
 # The function that we are going to fit and thus want to use as our model function is N, which we import
 
 
 def partial_f_a(x, a, b, c):
-    return helper_func(x, a, b, c) * np.log(x / b)
+    return f_profile(x, a, b, c) * np.log(x / b)
 
 
 def partial_f_b(x, a, b, c):
-    return helper_func(x, a, b, c) * (-(a - 3) / b + (c / b) * (x / b) ** c)
+    return f_profile(x, a, b, c) * (-(a - 3) / b + (c / b) * (x / b) ** c)
 
 
 def partial_f_c(x, a, b, c):
-    return -helper_func(x, a, b, c) * (x / b) ** c * np.log(x / b)
+    return -f_profile(x, a, b, c) * (x / b) ** c * np.log(x / b)
 
 
 def partial_I_a(x, dx, a, b, c):
-
-    return partial_f_a(x, a, b, c) * x**2 * dx
+    return np.sum(partial_f_a(x, a, b, c) * x**2) * dx
 
 
 def partial_I_b(x, dx, a, b, c):
-    return partial_f_b(x, a, b, c) * x**2 * dx
+    return np.sum(partial_f_b(x, a, b, c) * x**2) * dx
 
 
 def partial_I_c(x, dx, a, b, c):
-    return partial_f_c(x, a, b, c) * x**2 * dx
-
-
-def partial_A_a(x, A, a, b, c):
-    return -4 * np.pi * A**2 * partial_I_a(x, a, b, c)
-
-
-def partial_A_b(x, A, a, b, c):
-    return -4 * np.pi * A**2 * partial_I_b(x, a, b, c)
-
-
-def partial_A_c(x, A, a, b, c):
-    return -4 * np.pi * A**2 * partial_I_c(x, a, b, c)
+    return np.sum(partial_f_c(x, a, b, c) * x**2) * dx
 
 
 def partial_N_a(x, I_total, I_i, dx, A, Nsat, a, b, c):
-    return 4 * np.pi * Nsat * A * (partial_I_a(x, dx, a, b, c) - (I_i / I_total) * partial_I_a(x, a, b, c))
+    return 4 * np.pi * Nsat * A * (partial_I_a(x, dx, a, b, c) - (I_i / I_total) * partial_I_a(x, dx, a, b, c))
 
 
 def partial_N_b(x, I_total, I_i, dx, A, Nsat, a, b, c):
-    return 4 * np.pi * Nsat * A * (partial_I_b(x, dx, a, b, c) - (I_i / I_total) * partial_I_b(x, a, b, c))
+    return 4 * np.pi * Nsat * A * (partial_I_b(x, dx, a, b, c) - (I_i / I_total) * partial_I_b(x, dx, a, b, c))
 
 
 def partial_N_c(x, I_total, I_i, dx, A, Nsat, a, b, c):
-    return 4 * np.pi * Nsat * A * (partial_I_c(x, dx, a, b, c) - (I_i / I_total) * partial_I_c(x, a, b, c))
+    return 4 * np.pi * Nsat * A * (partial_I_c(x, dx, a, b, c) - (I_i / I_total) * partial_I_c(x, dx, a, b, c))
 
 
 partial_derivative_list = [partial_N_a, partial_N_b, partial_N_c]
@@ -103,7 +90,7 @@ class LUDecomposition:
 
 
 class LevenbergMarquardt:
-    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.ndarray, linear=False):
+    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.ndarray, linear, A, Nsat):
         """Implement the Levenberg Marquardt algorithm.
         x are the abscissa points of the measured data, y are the measured data values.
         partial_derivative_list should contain a list of the partial derivatives of the function to be fitted, with the partial derivative to each parameter.
@@ -123,51 +110,36 @@ class LevenbergMarquardt:
         self.f = f
         self.p = p
         self.linear = linear
-        self._construct_covariance_matrix()
+        self.A = A  # I adapted by algorithm for this use case
+        self.Nsat = Nsat
 
     def _calculate_model(self):
         # calculate the expected (=model) y values by putting the x values together with the current parameter estimation into the function
         # self.y_model will now be a vector of length # of bins, with every x the (mean?) x value of that bin and every y the Ni_tilde, the mean number of satellites per halo in each radial bin according to the model.
-        self.y_model = self.f(self.x, *self.p)  # unpack the vector of parameters into the function
+        self.y_model = self.f(self.x, self.A, self.Nsat, *self.p)  # unpack the vector of parameters into the function
 
     def _construct_jacobian(self):
         """Construct the Jacobian, the matrix holding partial derivatives i.e. dau y_i/dau p_j for as set of datapoints and another set of parameters.
         So why do we supply an x array instead of a y array? because we fill in x in the analytical partial derivative of each parameter
         """
         self.J = np.zeros((len(self.x), len(self.partial_derivative_list)))
-        I_total = np.sum(helper_func(xval, *self.p[2:]) * xval**2 for xval in self.x)  # Supply f(x,a,b,c) with a,b and c in self.p
-        dx = self.x[1] - self.x[0]
+        I_total = np.sum(f_profile(xval, *self.p) * xval**2 for xval in self.x)  # Supply f(x,a,b,c) with a,b and c in self.p
+
         for i, x_value in enumerate(self.x):
-            I_i = helper_func(x_value, *self.p[2:]) * x_value**2
+            if i != len(self.x) - 1:  # Since we have n-1 intervals, don't recalculate dx for the last interval
+                dx = self.x[i + 1] - self.x[i]  # since x spacing can be logarithmic, recalculate dx
+            I_i = f_profile(x_value, *self.p) * x_value**2
             for j, partial_derivative in enumerate(self.partial_derivative_list):
-                self.J[i, j] = partial_derivative(x_value, I_total, I_i, *self.p)  # unpack the vector of parameters in the partial derivative
+                self.J[i, j] = partial_derivative(x_value, I_total, I_i, dx, self.A, self.Nsat, *self.p)  # unpack the vector of parameters in the partial derivative
 
-    def _construct_covariance_matrix(self):
-        number_of_data_points = len(self.y_measured)
-        if isinstance(
-            self.sigma, (int, float)
-        ):  # This is the case for Least Squares, where the standard deviation is constant for all x_i, and there is no correlation between the sigmas for various x_i's
-            self.std2_inv = 1 / self.sigma**2  # add to self for use in iterative calculation of chi square
-            self.std2_inverse_matrix = np.identity(number_of_data_points) * self.std2_inv
-
-        elif isinstance(
-            self.sigma, (list, tuple)
-        ):  # This is the case for Chi Squared, where the standard deviation can be different for each x_i, but there is no correlation between the sigmas for various x_i's
-            if len(self.sigma) != number_of_data_points:
-                raise ValueError("Length of standard deviation iterable should match number of datapoints")
-            cov = np.identity(number_of_data_points)
-            self.std2_inv_list = 1 / np.array(self.sigma) ** 2
-            for i in range(len(cov)):
-                cov[i, i] *= self.std2_inv_list[i]
-            self.std2_inverse_matrix = cov
-        elif isinstance(
-            self.sigma, np.ndarray
-        ):  # This is the most general case where the standard deviation can be different for each x_i, AND there is can be correlation between the sigmas for various x_i's
-            if len(self.sigma) != number_of_data_points or self.sigma.shape[0] != self.sigma.shape[1]:
-                raise ValueError("Length of standard deviation array should match number of datapoints and sigma should be a square array")
-            self.std2_inverse_matrix = 1 / self.sigma**2
-        else:
-            raise TypeError("Unknown type supplied to construct covariance matrix method")
+    def _construct_inverse_covariance_matrix(self):
+        # We had to adapt this method for this problem, where the variance and thus the covariance matrix is dependent on N_i_tilde, which is dependent on the parameters
+        # We left only the case for Chi Squared, where the standard deviation can be different for each x_i, but there is no correlation between the sigmas for various x_i's)
+        cov_inv = np.identity(len(self.y_model))
+        self.std2_inv_list = 1 / self.y_model
+        for i in range(len(cov_inv)):
+            cov_inv[i, i] *= self.std2_inv_list[i]
+        self.std2_inverse_matrix = cov_inv
 
     def _calculate_alpha(self):
         """Alpha is the square matrix with nrows = ncols = the number of parameters in the function that we are fitting.
@@ -198,23 +170,28 @@ class LevenbergMarquardt:
         """
         if not isinstance(self.sigma, (list, tuple)):
             raise TypeError("sigma should be a list or tuple of standard deviations for use in chi square")
-        return np.sum(self.y_delta**2 * self.std2_inv_list)
+        return np.sum(
+            self.y_delta**2 / self.y_model
+        )  # I replaced * self.std2 here with / self.y_model, since we are told the model mean and variance are equal to N_i_tilde, which changes with the parameters a,b and c
 
     def _do_iteration(self):
         self._construct_jacobian()
         self._calculate_alpha()
         self._calculate_beta()
         delta_p = self._solve_delta_p()  # solve the linear system of equations to find the change in our parameter estimation
-        self.p += delta_p
+        self.p += delta_p  # add deltas for a, b and c
+        self.A = get_normalization_constant(*self.p)  # recalculate A based on the new a, b and c
         self._calculate_model()
+        self._construct_inverse_covariance_matrix()  # Since in this case the covariance matrix depends on the model, recalculate covariance matrix after updating model
         self.y_delta = self.y_measured - self.y_model  # used for both beta (the residual) and chisquare, only calculate once per model update
         self.new_chisquare = self._calculate_chisquare()
 
     def iteratively_improve_solution(self, weight: float = 10.0, improvement_threshold: float = 0.01):
         self._calculate_model()  # Calculate the y model values for the initial parameter estimation p_0
+        self._construct_inverse_covariance_matrix()  # Since in this case the covariance matrix depends on the model, recalculate covariance matrix after updating model
         self.y_delta = self.y_measured - self.y_model  # used for both beta (the residual) and chisquare, only calculate once per model update
         self.old_chisquare = self._calculate_chisquare()  # Step 1: calculate chisquare for p_0
-        self.lmbda = 1e-3
+        self.lmbda = 1e-6
         self._do_iteration()
         self.num_iterations = 1
         if self.linear:  # If model function is linear in parameters, Levenberg Marquardt will converge to the correct solution in 1 iteration, and we don't have to do a second one to confirm we are not longer improving.
@@ -228,4 +205,4 @@ class LevenbergMarquardt:
                 self.lmbda /= weight  # We are close to the minimum, make smaller steps (more Quasi Newton)
             self._do_iteration()
             self.num_iterations += 1
-        return self.p, self.num_iterations  # self.p now contains the parameters for the best fit!
+        return self.p, self.num_iterations, self.old_chisquare  # self.p now contains the parameters for the best fit, the number of iterations, and the minimum chi square value

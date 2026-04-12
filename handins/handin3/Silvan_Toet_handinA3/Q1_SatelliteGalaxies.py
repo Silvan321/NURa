@@ -126,7 +126,7 @@ def do_question_1a():
     axs[0].set_title("n(x) dx")
     axs[1].plot(x_range, N_func(x_range, A_1a, Nsat, a, b, c))
     axs[1].set_title("N(x) dx")
-    plt.savefig("Plots/nx_vs_Nx.png", dpi=600)
+    plt.savefig(this_directory / "Plots/nx_vs_Nx.png", dpi=600)
     plt.close()
 
     # First we want to create a 3 point bracket which brackets our maximum
@@ -189,27 +189,30 @@ def do_question_1b():
         # plt.show()
 
         # TODO: implement the fitting of N(x) to the data using chi-squared minimization.
-        sigma = 0.001  # scale set smaller initiall
-        sigma_list = [sigma for _ in range(bins)]
+        # we are told to set the variance sigma_i^2 for each datapoint (bin) to its mean, meaning we have to recompute it when a,b and c change
+        # Therefore set sigma to placeholder values because the class expects it, but don't actually use it.
+        sigma_list = [1 for _ in range(bins)]
         a_1a = 2.4
         b_1a = 0.25
         c_1a = 1.6
         A_1a = 256 / (5 * np.pi ** (3 / 2))
-        initial_p = np.array([A_1a, Nsat, a_1a, b_1a, c_1a], dtype=np.float64)  # Use values from 1a as initial parameter estimates for A, a, b and c. Use observed Nsat as model Nsat
+        initial_p = np.array([a_1a, b_1a, c_1a], dtype=np.float64)  # Use values from 1a as initial parameter estimates for A, a, b and c. Use observed Nsat as model Nsat
 
-        lm = LevenbergMarquardt(centers, N_i, partial_derivative_list, sigma_list, N_func, initial_p, linear=True)
-        print(lm.iteratively_improve_solution())
+        lm = LevenbergMarquardt(centers, N_i, partial_derivative_list, sigma_list, N_func, initial_p, linear=False, A=A_1a, Nsat=Nsat)
+        best_fit_params, num_iter, min_chi2 = lm.iteratively_improve_solution()
 
         # Store N_sat, chi2 values and best-fit parameters in their arrays
-        N_sat.append(Nsat)
-        min_chi2_values.append(0.0)
-        best_params_chi2.append((0.0, 0.0, 0.0))  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization
+        N_sat.append(Nsat)  # Nsat is calculated from the data, not from the fit
+        min_chi2_values.append(min_chi2)
+        best_params_chi2.append(best_fit_params)  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization
 
         # Plot the data and the best-fit model for each data file in a subplot.
         axs[datafiles.index(datafile)].hist([], bins=bins)  # plot the histogram of the data
 
         x_plot = np.linspace(x_lower, x_upper, 100)  # create x_array for plotting the model
-        axs[datafiles.index(datafile)].plot(x_plot, np.ones_like(x_plot))  # plot the best-fit model using the best-fit parameters found from chi-squared minimization
+        axs[datafiles.index(datafile)].plot(
+            x_plot, N_func(x_plot, get_normalization_constant(*best_fit_params), Nsat, *best_fit_params)
+        )  # plot the best-fit model using the best-fit parameters found from chi-squared minimization
 
         # Add labels and title to the subplot
         axs[datafiles.index(datafile)].set_title(f"Data file: {datafile}")
@@ -222,10 +225,10 @@ def do_question_1b():
 
     # Save the figure with all subplots
     plt.tight_layout()
-    plt.savefig("Plots/satellite_fits_chi2.png")
+    plt.savefig(this_directory / "Plots/satellite_fits_chi2.png")
 
     # Save N_sat, chi2 values and best-fit parameters for each data file to tex files for later use in the PDF
-    with open("Calculations/table_fitparams_chi2.tex", "w") as f:
+    with open(this_directory / "Calculations/table_fitparams_chi2.tex", "w") as f:
         rows = list(zip(N_sat, min_chi2_values, best_params_chi2))
         for idx, (N, chi2_val, params) in enumerate(rows):
             a, b, c = params
@@ -245,7 +248,7 @@ def do_question_1c():
     axs = axs.flatten()
 
     for datafile in datafiles:
-        radius, nhalo = readfile(f"Data/satgals_{datafile}.txt")
+        radius, nhalo = readfile(this_directory / f"Data/satgals_{datafile}.txt")
         x_lower, x_upper = (
             10**-4,
             5,
@@ -273,10 +276,10 @@ def do_question_1c():
 
     # Save the figure with all subplots
     plt.tight_layout()
-    plt.savefig("Plots/satellite_fits_poisson.png")
+    plt.savefig(this_directory / "Plots/satellite_fits_poisson.png")
 
     # Save poisson llh values and best-fit parameters for each data file to text files for later use in the PDF
-    with open("Calculations/table_fitparams_poisson.tex", "w") as f:
+    with open(this_directory / "Calculations/table_fitparams_poisson.tex", "w") as f:
         rows = list(zip(min_poisson_llh_values, best_params_poisson))
         for idx, (llh_val, params) in enumerate(rows):
             a, b, c = params
@@ -295,7 +298,7 @@ def do_question_1d():
     Q_scores_poisson = []
 
     for datafile in datafiles:
-        radius, nhalo = readfile(f"Data/satgals_{datafile}.txt")
+        radius, nhalo = readfile(this_directory / f"Data/satgals_{datafile}.txt")
 
         # Use best-fit parameters from previous steps
         best_params_chi2 = (0.0, 0.0, 0.0)  # replace by the correct array
@@ -310,7 +313,7 @@ def do_question_1d():
         Q_scores_poisson.append(0.0)
 
     # Save G and Q scores for chi2 and poisson fits to tex files for later use in the PDF
-    with open("Calculations/statistical_test_table_rows.tex", "w") as f:
+    with open(this_directory / "Calculations/statistical_test_table_rows.tex", "w") as f:
         rows = []
         for i, (G, Q) in enumerate(zip(G_scores_chi2, Q_scores_chi2), start=11):
             rows.append(f"$\\chi^2$ & m{i} & {G:.5f} & {Q:.5f}")
@@ -331,7 +334,7 @@ def do_question_1e():
     datafiles = ["m11", "m12", "m13", "m14", "m15"]
     index = 1  # index of the data file to use for Monte Carlo simulations, e.g. 1 for m12
 
-    radius, nhalo = readfile(f"Data/satgals_{datafiles[index]}.txt")
+    radius, nhalo = readfile(this_directory / f"Data/satgals_{datafiles[index]}.txt")
 
     # Use best-fit parameters from previous steps for the original data file
     best_params_chi2 = (0.0, 0.0, 0.0)  # replace by the correct array
@@ -368,7 +371,7 @@ def do_question_1e():
     plt.xscale("log")
     plt.yscale("log")
     plt.legend(["Pseudo-dataset fits", "Original fit", "Mean of pseudo fits"])
-    plt.savefig("Plots/satellite_monte_carlo_chi2.png")
+    plt.savefig(this_directory / "Plots/satellite_monte_carlo_chi2.png")
 
     # poisson plot
     x_plot = np.linspace(1e-4, 5, 100)  # create x_array for plotting the model
@@ -386,7 +389,7 @@ def do_question_1e():
     plt.xscale("log")
     plt.yscale("log")
     plt.legend(["Pseudo-dataset fits", "Original fit", "Mean of pseudo fits"])
-    plt.savefig("Plots/satellite_monte_carlo_poisson.png")
+    plt.savefig(this_directory / "Plots/satellite_monte_carlo_poisson.png")
 
 
 if __name__ == "__main__":

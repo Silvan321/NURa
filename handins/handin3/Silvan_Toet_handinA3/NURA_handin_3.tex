@@ -62,9 +62,11 @@ Since n(x) where x is the radius relative to virial radius \(x=r/r_{vir}\) is on
 Dividing by \(\langle N_{sat} \rangle\) on both sides and rearranging gives us an expression for \(A\).
 
 The general calling code for all subquestions is included below.
+Also shown here are definitions for n(x), N(x) and the calculation for A, as these are used in multiple questions.
 Specific functions used for one or several subquestions are shown at that subquestion.
 \lstinputlisting[language=Python]{\CodeDir/satellites_general.txt}
 \lstinputlisting[language=Python]{\CodeDir/satellites_nx_Nx_and_A.txt}
+\lstinputlisting[language=Python]{\CodeDir/satellites_Romberg_integrator.txt}
 
 \subsection{(1a) Maximum of N(x)}
 For this question we are asked to find the maximum of N(x), the number of satellites in the infinitesimal range [x, x+dx), for given values of a, b, c, $N_{sat}$ and \(A\).
@@ -169,7 +171,26 @@ So
   \frac{\partial \tilde{N_i}}{\partial p} = 4 \pi \langle N_{sat} \rangle A \left(\frac{\partial I_i}{\partial p} - \frac{I_i}{I_{total}} \frac{\partial I_{total}}{\partial p}\right)
 \end{align}
 
-Argue the choices of your binning. Explain the minimization routine used. Bonus points for a correctly implemented derivative-based routine.
+We made some changes to our LM implementation due to the nature of the questions.
+The model value, which gives $\tilde{N_i}$, is used for the mean in the $\chi^2$ calculation since it is stated that this value is both the model mean $\mu_i$ and variance $\sigma_i^2$ of a bin i.
+We also need to recalculate the inverse covariance matrix since in the case of $\chi^2$ this consists of $1/\sigma_i^2$ on the diagonal elements.
+
+
+The idea is then as follows:
+\begin{itemize}
+  \item Calculate the model for initial values of the parameters $p$=(a,b,c), derived value A and observed value Nsat
+  \item Calculate the $\chi^2$ value for this model by comparing it to the binned data
+  \item Do a small step $\lambda$ to update $\alpha$ ($\alpha$ and $\beta$ now also change because the inverse covariance matrix changes).
+  \item Solve $\alpha \delta p = \beta$ using our own implementation of LU Decomposition
+  \item Update $p$ with $\delta p$ and recalculate A using our own implementation of Romberg integration
+  \item Recalculate the model and the inverse covariance matrix
+  \item Calculate a new $\chi^2$
+  \item If the new $\chi^2$ is larger than the old one, the old solution was better, we are far from the minimum and we make our step size bigger to lean into steepest descent
+  \item Else the new solution is better and we make our step size smaller to lean more into quasi Newton
+\end{itemize}
+
+Unfortunately our solution quickly diverges, with parameter values increasing significantly in 1 step. We are unsure if this is due to a wrong calculation of the partial derivatives or something else.
+We have tried setting the initial lambda smaller. We have also tried using linearly binned data instead of logarithmically binned data.
 
 \begin{table}[H]
   \centering
@@ -189,13 +210,21 @@ Argue the choices of your binning. Explain the minimization routine used. Bonus 
   \caption{Fit of the satellite number density profile using the chi-squared method.}
 \end{figure}
 
-\subsubsection{Code for $\chi^2$-fit}
-NOTE: all code is reproduced below as an example, show only the relevant lines for this exercise here instead.
-\lstinputlisting[language=Python]{\CodeDir/satellites_chi2.txt}
+\subsubsection{Code for $\chi^2$-fit using the Levenberg-Marquardt algorithm}
+\lstinputlisting[language=Python]{\CodeDir/satellites_Levenberg_Marquardt_minimizer.txt}
+
 
 \subsection{(1c) Poisson ln-likelihood fit}
+Now we have to fit the model using a Poisson ln-likelihood fit. We are aware that we cannot use Levenberg Marquardt for this (at least not in the standard form)
 
-Explain how you determine the Poisson ln-likelihood. Describe the optimization method used. How do your best fit parameters differ from the ones obtained in (1b)? Why?
+This means we should minimize the negative log likelihood
+\begin{align}
+  - ln L(a,b,c) & = \sum_{i}^{N_{bins}} ln \left(\frac{\mu_i^{N_i} e^{-\mu_i}}{N_i!}\right)                     \\
+                & = \sum_{i}^{N_{bins}} \left(N_i ln(\tilde{N_i}(a,b,c)) - \tilde{N_i}(a,b,c) - ln(N_i!)\right)
+\end{align}
+Where we have used $\mu_i \equiv \tilde{N_i}$ and the term $ln(N_i!)$ can be dropped because it does not depend on the fit parameters a,b,c.
+
+Unfortunately this is how far we got with this assignment. The Levenberg Marquardt algorithm took so much time that we did not get around to the other questions.
 
 \begin{table}[H]
   \centering

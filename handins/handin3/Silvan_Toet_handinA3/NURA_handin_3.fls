@@ -205,6 +205,9 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tctt0
 INPUT .\Code\satellites_nx_Nx_and_A.txt
 INPUT .\Code\satellites_nx_Nx_and_A.txt
 INPUT Code\satellites_nx_Nx_and_A.txt
+INPUT .\Code\satellites_Romberg_integrator.txt
+INPUT .\Code\satellites_Romberg_integrator.txt
+INPUT Code\satellites_Romberg_integrator.txt
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
 INPUT .\Plots\nx_vs_Nx.png
 INPUT .\Plots\nx_vs_Nx.png
@@ -223,6 +226,7 @@ INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx10.
 INPUT .\Code\satellites_golden_section_minimizer.txt
 INPUT .\Code\satellites_golden_section_minimizer.txt
 INPUT Code\satellites_golden_section_minimizer.txt
+INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tcrm1000.tfm
 INPUT .\Calculations\table_fitparams_chi2.tex
 INPUT .\Calculations\table_fitparams_chi2.tex
 INPUT Calculations\table_fitparams_chi2.tex
@@ -233,9 +237,9 @@ INPUT .\Plots\satellite_fits_chi2.png
 INPUT .\Plots\satellite_fits_chi2.png
 INPUT .\Plots\satellite_fits_chi2.png
 INPUT .\Plots\satellite_fits_chi2.png
-INPUT .\Code\satellites_chi2.txt
-INPUT .\Code\satellites_chi2.txt
-INPUT Code\satellites_chi2.txt
+INPUT .\Code\satellites_Levenberg_Marquardt_minimizer.txt
+INPUT .\Code\satellites_Levenberg_Marquardt_minimizer.txt
+INPUT Code\satellites_Levenberg_Marquardt_minimizer.txt
 INPUT .\Calculations\table_fitparams_poisson.tex
 INPUT .\Calculations\table_fitparams_poisson.tex
 INPUT Calculations\table_fitparams_poisson.tex
@@ -275,6 +279,8 @@ INPUT Code\satellites_monte_carlo.txt
 INPUT NURA_handin_3.aux
 INPUT .\NURA_handin_3.out
 INPUT .\NURA_handin_3.out
+INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
+INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1000.pk
 INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tctt0800.pk
 INPUT C:\Users\toetseb\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tctt0800.pk
 INPUT C:\Users\toetseb\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx10.pfb
