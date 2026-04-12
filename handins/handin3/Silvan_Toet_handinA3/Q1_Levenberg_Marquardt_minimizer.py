@@ -3,35 +3,34 @@ from functools import partial
 from typing import Union
 
 import numpy as np
+from Q1_nx_Nx_and_A import N_func, helper_func, get_normalization_constant, n_func
 
-from Q1_nx_Nx_and_A import n, N, get_normalization_constant, f
+# The function that we are going to fit and thus want to use as our model function is N, which we import
 
 
 def partial_f_a(x, a, b, c):
-    return f(x, a, b, c) * np.log(x / b)
+    return helper_func(x, a, b, c) * np.log(x / b)
 
 
 def partial_f_b(x, a, b, c):
-    return f(x, a, b, c) * (-(a - 3) / b + (c / b) * (x / b) ** c)
+    return helper_func(x, a, b, c) * (-(a - 3) / b + (c / b) * (x / b) ** c)
 
 
 def partial_f_c(x, a, b, c):
-    return -f(x, a, b, c) * (x / b) ** c * np.log(x / b)
+    return -helper_func(x, a, b, c) * (x / b) ** c * np.log(x / b)
 
 
-def partial_I_a(x, a, b, c):
-    dx = x[1] - x[0]
-    return np.sum(partial_f_a(x, a, b, c) * x**2) * dx
+def partial_I_a(x, dx, a, b, c):
+
+    return partial_f_a(x, a, b, c) * x**2 * dx
 
 
-def partial_I_b(x, a, b, c):
-    dx = x[1] - x[0]
-    return np.sum(partial_f_b(x, a, b, c) * x**2) * dx
+def partial_I_b(x, dx, a, b, c):
+    return partial_f_b(x, a, b, c) * x**2 * dx
 
 
-def partial_I_c(x, a, b, c):
-    dx = x[1] - x[0]
-    return np.sum(partial_f_c(x, a, b, c) * x**2) * dx
+def partial_I_c(x, dx, a, b, c):
+    return partial_f_c(x, a, b, c) * x**2 * dx
 
 
 def partial_A_a(x, A, a, b, c):
@@ -46,22 +45,16 @@ def partial_A_c(x, A, a, b, c):
     return -4 * np.pi * A**2 * partial_I_c(x, a, b, c)
 
 
-def partial_N_a(x, i, Nsat, A, a, b, c):
-    I_i = np.sum(f(xval) * xval**2 for xval in x[i : i + 1])
-    I_total = np.sum(f(xval) * xval**2 for xval in x)
-    return 4 * np.pi * Nsat * A * (partial_I_a(x[i : i + 1], a, b, c) - (I_i / I_total) * partial_I_a(x, a, b, c))
+def partial_N_a(x, I_total, I_i, dx, A, Nsat, a, b, c):
+    return 4 * np.pi * Nsat * A * (partial_I_a(x, dx, a, b, c) - (I_i / I_total) * partial_I_a(x, a, b, c))
 
 
-def partial_N_b(x, i, Nsat, A, a, b, c):
-    I_i = np.sum(f(xval) * xval**2 for xval in x[i : i + 1])
-    I_total = np.sum(f(xval) * xval**2 for xval in x)
-    return 4 * np.pi * Nsat * A * (partial_I_b(x[i : i + 1], a, b, c) - (I_i / I_total) * partial_I_b(x, a, b, c))
+def partial_N_b(x, I_total, I_i, dx, A, Nsat, a, b, c):
+    return 4 * np.pi * Nsat * A * (partial_I_b(x, dx, a, b, c) - (I_i / I_total) * partial_I_b(x, a, b, c))
 
 
-def partial_N_c(x, i, Nsat, A, a, b, c):
-    I_i = np.sum(f(xval) * xval**2 for xval in x[i : i + 1])
-    I_total = np.sum(f(xval) * xval**2 for xval in x)
-    return 4 * np.pi * Nsat * A * (partial_I_c(x[i : i + 1], a, b, c) - (I_i / I_total) * partial_I_c(x, a, b, c))
+def partial_N_c(x, I_total, I_i, dx, A, Nsat, a, b, c):
+    return 4 * np.pi * Nsat * A * (partial_I_c(x, dx, a, b, c) - (I_i / I_total) * partial_I_c(x, a, b, c))
 
 
 partial_derivative_list = [partial_N_a, partial_N_b, partial_N_c]
@@ -110,7 +103,7 @@ class LUDecomposition:
 
 
 class LevenbergMarquardt:
-    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.float64, linear=False):
+    def __init__(self, x: np.ndarray, y: np.ndarray, partial_derivative_list: list[Callable], sigma, f: Callable, p: np.ndarray, linear=False):
         """Implement the Levenberg Marquardt algorithm.
         x are the abscissa points of the measured data, y are the measured data values.
         partial_derivative_list should contain a list of the partial derivatives of the function to be fitted, with the partial derivative to each parameter.
@@ -134,7 +127,7 @@ class LevenbergMarquardt:
 
     def _calculate_model(self):
         # calculate the expected (=model) y values by putting the x values together with the current parameter estimation into the function
-        # self.y_model will now be a vector of the amount ˜Ni as the mean number of satellites per halo in each radial bin.
+        # self.y_model will now be a vector of length # of bins, with every x the (mean?) x value of that bin and every y the Ni_tilde, the mean number of satellites per halo in each radial bin according to the model.
         self.y_model = self.f(self.x, *self.p)  # unpack the vector of parameters into the function
 
     def _construct_jacobian(self):
@@ -142,9 +135,12 @@ class LevenbergMarquardt:
         So why do we supply an x array instead of a y array? because we fill in x in the analytical partial derivative of each parameter
         """
         self.J = np.zeros((len(self.x), len(self.partial_derivative_list)))
+        I_total = np.sum(helper_func(xval, *self.p[2:]) * xval**2 for xval in self.x)  # Supply f(x,a,b,c) with a,b and c in self.p
+        dx = self.x[1] - self.x[0]
         for i, x_value in enumerate(self.x):
+            I_i = helper_func(x_value, *self.p[2:]) * x_value**2
             for j, partial_derivative in enumerate(self.partial_derivative_list):
-                self.J[i, j] = partial_derivative(x_value)
+                self.J[i, j] = partial_derivative(x_value, I_total, I_i, *self.p)  # unpack the vector of parameters in the partial derivative
 
     def _construct_covariance_matrix(self):
         number_of_data_points = len(self.y_measured)

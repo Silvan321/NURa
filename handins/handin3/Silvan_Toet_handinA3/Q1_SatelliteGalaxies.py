@@ -1,12 +1,18 @@
 # imports
+import sys
 from collections.abc import Callable
 from functools import partial
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from Q1_golden_section_minimizer import bracket_minimum, golden_section_search
-from Q1_nx_Nx_and_A import N, get_normalization_constant, n
+from Q1_Levenberg_Marquardt_minimizer import LevenbergMarquardt, partial_derivative_list
+from Q1_nx_Nx_and_A import N_func, get_normalization_constant, n_func
 from Q1_poisson import negative_poisson_ln_likelihood
+
+this_directory = Path(__file__).resolve().parents[0]  # Use this directory for absolute imports to allow running the script in debug mode
+sys.path.append(this_directory)  # Append directory to sys path to fix relative import shenanigans
 
 
 def readfile(filename):
@@ -42,33 +48,31 @@ def readfile(filename):
     )  # Return the virial radius for all the satellites in the file, and the number of halos
 
 
-def minimize_chi2(model: callable, data: np.ndarray, initial_params: tuple) -> tuple:
+def bin_data(x_all, n_haloes, n_bins, x_min, x_max, log_bins):
     """
-    Minimize the chi-squared value for a given model and data.
-
-    Parameters
-    ----------
-    model : callable
-        The model function to compare to the data.
-    data : ndarray
-        The observed data to compare the model to.
-    initial_params : tuple
-        Initial guess for the parameters to minimize over.
-
-    Returns
-    -------
-    best_params : tuple
-        The parameters that minimize the chi-squared value.
-    min_chi2 : float
-        The minimum chi-squared value achieved.
+    Returns:
+        bin_centers
+        N_i  (mean observed satellites per halo per bin)
+        edges
     """
 
-    # TODO: implement the minimization of chi2 using your custom method. Remember to normalize for each minimization step
+    if log_bins:
+        edges = np.logspace(np.log10(x_min), np.log10(x_max), n_bins + 1)
+    else:
+        edges = np.linspace(0.0, x_max, n_bins + 1)
 
-    best_params = initial_params
-    min_chi2 = chi2(model, data, initial_params)  # replace by the correct calculation of chi2 for the given parameters
+    counts, _ = np.histogram(x_all, bins=edges)
 
-    return best_params, min_chi2
+    # Convert to mean per halo
+    N_i = counts / n_haloes
+
+    # Bin centers (geometric for log bins, based on lecture 9 slide 31: x_log = sqrt(x1*x2) -> log(x_log) = 0.5 * (x1 + x2))
+    if log_bins:
+        centers = np.sqrt(edges[:-1] * edges[1:])
+    else:
+        centers = 0.5 * (edges[:-1] + edges[1:])
+
+    return centers, N_i, edges
 
 
 def minimize_poisson_ln_likelihood(model: callable, data: np.ndarray, initial_params: tuple) -> tuple:
@@ -118,16 +122,17 @@ def do_question_1a():
 
     fig1a, axs = plt.subplots(1, 2, figsize=(16, 10))
     plt.suptitle("n(x) dx, the number density profile, compared to N(x) dx, \nthe number of satellites in the infinitesimal range [x, x+dx)")
-    axs[0].plot(x_range, n(x_range, A_1a, Nsat, a, b, c))
+    axs[0].plot(x_range, n_func(x_range, A_1a, Nsat, a, b, c))
     axs[0].set_title("n(x) dx")
-    axs[1].plot(x_range, N(x_range, A_1a, Nsat, a, b, c))
+    axs[1].plot(x_range, N_func(x_range, A_1a, Nsat, a, b, c))
     axs[1].set_title("N(x) dx")
     plt.savefig("Plots/nx_vs_Nx.png", dpi=600)
+    plt.close()
 
     # First we want to create a 3 point bracket which brackets our maximum
     # Since our algorithms are designed to find the minimum, we have to input the negative of the function in question
 
-    N_1a = partial(N, A=A_1a, Nsat=Nsat, a=a, b=b, c=c)  # create a partial function with all variables that are given for Q1a fixed
+    N_1a = partial(N_func, A=A_1a, Nsat=Nsat, a=a, b=b, c=c)  # create a partial function with all variables that are given for Q1a fixed
     N_1a_negative = lambda x: -N_1a(x)  # Create the negative of the function
     three_point_bracket = bracket_minimum(func=N_1a_negative, a=1, b=1.1)
     print(three_point_bracket)
@@ -143,9 +148,10 @@ def do_question_1a():
     # Since I don't expect a to go below 1 while fitting the data and give the same problem.
 
     # Write the results to text files for later use in the PDF
-    with open("Calculations/satellite_max_x.txt", "w") as f:
+
+    with open(this_directory / "Calculations/satellite_max_x.txt", "w") as f:
         f.write(f"{x_max:.6f}")
-    with open("Calculations/satellite_max_Nx.txt", "w") as f:
+    with open(this_directory / "Calculations/satellite_max_Nx.txt", "w") as f:
         f.write(f"{Nx_max:.6f}")
 
 
@@ -162,19 +168,40 @@ def do_question_1b():
     axs = axs.flatten()
 
     for datafile in datafiles:
-        radius, nhalo = readfile(f"Data/satgals_{datafile}.txt")
+        radius, nhalo = readfile(this_directory / f"Data/satgals_{datafile}.txt")
         print(f"{datafile=}, {np.min(radius)=}, {np.max(radius)=} {nhalo=}")
 
-        x_lower, x_upper = (
-            10**-4,
-            5,
-        )  # replace by appropriate limits for x based on the data
-        bins = 30  # choose appropriate bins
+        x_lower, x_upper = (10**-4, 5)
+        bins = 30
+        centers, N_i, edges = bin_data(radius, nhalo, n_bins=30, x_min=x_lower, x_max=x_upper, log_bins=True)
+
+        print("Number of haloes:", nhalo)
+        print("First few N_i:", N_i[:5])
+        Nsat = len(radius) / nhalo  # Mean number of satellites in each halo should be the number of satellites divided by the number of halos
+        print(f"{np.sum(N_i)=}")  # This should be equal to the sum of all mean number of satellites per halo for all radial bins
+        print(f"{Nsat=}")
+
+        # plt.step(centers, N_i, where="mid")
+        # plt.xscale("log")
+        # plt.xlabel("x = r / r_vir")
+        # plt.ylabel("N_i (per halo)")
+        # plt.title("Binned satellite profile")
+        # plt.show()
 
         # TODO: implement the fitting of N(x) to the data using chi-squared minimization.
+        sigma = 0.001  # scale set smaller initiall
+        sigma_list = [sigma for _ in range(bins)]
+        a_1a = 2.4
+        b_1a = 0.25
+        c_1a = 1.6
+        A_1a = 256 / (5 * np.pi ** (3 / 2))
+        initial_p = np.array([A_1a, Nsat, a_1a, b_1a, c_1a], dtype=np.float64)  # Use values from 1a as initial parameter estimates for A, a, b and c. Use observed Nsat as model Nsat
+
+        lm = LevenbergMarquardt(centers, N_i, partial_derivative_list, sigma_list, N_func, initial_p, linear=True)
+        print(lm.iteratively_improve_solution())
 
         # Store N_sat, chi2 values and best-fit parameters in their arrays
-        N_sat.append(0.0)
+        N_sat.append(Nsat)
         min_chi2_values.append(0.0)
         best_params_chi2.append((0.0, 0.0, 0.0))  # replace by the correct best-fit parameters (a,b,c) found from chi-squared minimization
 
