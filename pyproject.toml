@@ -41,6 +41,7 @@ ignore = [
     "D417",
     "E402",   # false positives for local imports
     "E501",   # line too long
+    "ERA001",
     "TRY003", # external messages in exceptions are too verbose
     "FIX002", # too verbose descriptions of todos
     "N802",
